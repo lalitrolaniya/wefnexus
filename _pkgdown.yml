@@ -109,7 +109,10 @@ reference:
     contents:
       - normalize_minmax
       - normalize_zscore
-
+- title: "Package"
+    desc: "Package overview"
+    contents:
+      - wefnexus-package
   - title: "Data"
     desc: "Sample datasets"
     contents:
