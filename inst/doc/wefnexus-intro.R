@@ -1,0 +1,108 @@
+## ----setup, include = FALSE---------------------------------------------------
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(wefnexus)
+
+## ----data---------------------------------------------------------------------
+data(arid_pulse_nexus)
+d <- arid_pulse_nexus
+str(d)
+
+## ----water--------------------------------------------------------------------
+# Water Use Efficiency
+wue <- water_use_efficiency(d$grain_yield, d$total_water)
+
+# Crop Water Productivity
+cwp <- crop_water_productivity(d$grain_yield, d$crop_et)
+
+# Water Footprint (green + blue)
+wf <- water_footprint(
+  green_water = d$effective_rainfall,
+  blue_water = d$irrigation_applied,
+  yield = d$grain_yield
+)
+wf
+
+## ----energy-------------------------------------------------------------------
+# Total energy output
+e_out <- d$energy_output_grain + d$energy_output_straw
+
+# Energy Use Efficiency
+eue <- energy_use_efficiency(e_out, d$energy_input)
+
+# Energy Return on Investment (EROI)
+eroi_values <- eroi(e_out, d$energy_input)
+
+# Net Energy Balance
+ne <- net_energy(e_out, d$energy_input)
+
+# Compare treatments
+data.frame(Treatment = d$treatment, EUE = eue, EROI = eroi_values,
+           Net_Energy = ne)
+
+## ----food---------------------------------------------------------------------
+# Harvest Index
+bio_yield <- d$grain_yield + d$straw_yield
+hi <- harvest_index(d$grain_yield, bio_yield)
+
+# Protein Yield (assuming 22% protein in pulses)
+py <- protein_yield(d$grain_yield, protein_content = 22)
+
+data.frame(Treatment = d$treatment, HI = hi, Protein_kg_ha = py)
+
+## ----nutrient-----------------------------------------------------------------
+# Partial Factor Productivity of N
+pfp <- partial_factor_productivity(d$grain_yield, d$n_applied)
+
+# Nutrient Harvest Index for N
+nhi <- nutrient_harvest_index(d$grain_n_uptake, d$n_uptake)
+
+data.frame(Treatment = d$treatment, PFP_N = pfp, NHI_N = nhi)
+
+## ----carbon-------------------------------------------------------------------
+# Carbon Footprint (IPCC AR6 GWP: CH4=27, N2O=273)
+cf <- carbon_footprint(
+  diesel_use = d$diesel_use[1],
+  electricity_use = d$electricity_kwh[1],
+  n_fertilizer = d$n_applied[1],
+  p_fertilizer = d$p_applied[1],
+  yield = d$grain_yield[1]
+)
+cf$breakdown
+
+# Soil Carbon Stock
+soc <- soil_carbon_stock(d$soc_pct, d$bulk_density, depth = 30)
+
+# Global Warming Potential (example)
+gwp100 <- global_warming_potential(co2 = 500, ch4 = 10, n2o = 2)
+gwp20 <- global_warming_potential(co2 = 500, ch4 = 10, n2o = 2,
+                                   time_horizon = "20yr")
+
+## ----nexus--------------------------------------------------------------------
+# Full Nexus Summary
+ns <- nexus_summary(
+  yield = d$grain_yield,
+  water_consumed = d$total_water,
+  energy_input = d$energy_input,
+  energy_output = e_out,
+  n_applied = d$n_applied,
+  n_uptake = d$n_uptake,
+  carbon_emission = d$ghg_emission,
+  treatment_names = d$treatment
+)
+ns[, c("treatment", "EROI", "nexus_index")]
+
+## ----radar, fig.width=7, fig.height=6-----------------------------------------
+scores <- as.matrix(ns[, c("W_score", "E_score", "F_score",
+                             "N_score", "C_score")])
+nexus_radar(scores, treatment_names = d$treatment)
+
+## ----sustainability-----------------------------------------------------------
+nss <- nexus_sustainability_score(
+  water_score = ns$W_score,
+  energy_score = ns$E_score,
+  food_score = ns$F_score,
+  nutrient_score = ns$N_score,
+  carbon_score = ns$C_score
+)
+nss[, c("nexus_score", "category")]
+

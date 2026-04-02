@@ -1,0 +1,15 @@
+bibentry(
+  bibtype  = "Manual",
+  title    = "wefnexus: Water-Energy-Food-Nutrient-Carbon Nexus Analysis for Agronomic Systems",
+  author   = c(
+    person("Lalit Kumar", "Rolaniya"),
+    person("Hemant", "Poonia"),
+    person("Ram Lal", "Jat"),
+    person("Monika", "Punia"),
+    person("Raja Ram", "Choudhary")
+  ),
+  year     = "2026",
+  note     = "R package version 1.0.0",
+  url      = "https://CRAN.R-project.org/package=wefnexus",
+  doi      = "10.32614/CRAN.package.wefnexus"
+)

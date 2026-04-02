@@ -1,0 +1,140 @@
+url: https://lalitrolaniya.github.io/wefnexus/
+
+template:
+  bootstrap: 5
+  bootswatch: cosmo
+  bslib:
+    primary: "#0d6efd"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+
+home:
+  title: "wefnexus — WEFNC Nexus Analysis for Agriculture"
+  description: >
+    R package for Water-Energy-Food-Nutrient-Carbon nexus analysis
+    in agricultural production systems. 52 functions across 6 modules.
+  links:
+    - text: CRAN page
+      href: https://CRAN.R-project.org/package=wefnexus
+    - text: DOI
+      href: https://doi.org/10.32614/CRAN.package.wefnexus
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    github:
+      icon: fa-github
+      href: https://github.com/lalitrolaniya/wefnexus
+      aria-label: GitHub
+
+authors:
+  Lalit Kumar Rolaniya:
+    href: https://github.com/lalitrolaniya
+  Hemant Poonia:
+    href: "#"
+  Ram Lal Jat:
+    href: "#"
+  Monika Punia:
+    href: "#"
+  Raja Ram Choudhary:
+    href: "#"
+
+reference:
+  - title: "💧 Water Module"
+    desc: "Water use efficiency and footprint analysis"
+    contents:
+      - water_use_efficiency
+      - crop_water_productivity
+      - water_footprint
+      - irrigation_efficiency
+      - crop_water_stress_index
+      - depleted_fraction
+      - rainwater_use_efficiency
+      - irrigation_water_productivity
+      - water_productivity
+
+  - title: "⚡ Energy Module"
+    desc: "Energy balance and efficiency analysis"
+    contents:
+      - energy_input
+      - energy_output
+      - energy_use_efficiency
+      - eroi
+      - net_energy
+      - energy_profitability
+      - energy_intensity
+      - specific_energy
+      - human_energy_profitability
+      - energy_productivity
+
+  - title: "🌾 Food Module"
+    desc: "Food productivity and nutritional analysis"
+    contents:
+      - food_productivity_index
+      - harvest_index
+      - crop_yield_index
+      - land_equivalent_ratio
+      - system_productivity_index
+      - protein_yield
+      - caloric_yield
+      - production_efficiency_index
+
+  - title: "🧪 Nutrient Module"
+    desc: "Nutrient use efficiency analysis"
+    contents:
+      - partial_factor_productivity
+      - agronomic_efficiency
+      - recovery_efficiency
+      - physiological_efficiency
+      - internal_utilization_efficiency
+      - nutrient_harvest_index
+      - nutrient_use_efficiency
+      - nutrient_balance
+
+  - title: "🌿 Carbon Module"
+    desc: "Carbon footprint and GHG analysis"
+    contents:
+      - carbon_footprint
+      - ghg_emission
+      - global_warming_potential
+      - soil_carbon_stock
+      - carbon_efficiency
+      - carbon_sustainability_index
+      - carbon_sequestration_rate
+
+  - title: "🔗 Nexus Integration"
+    desc: "Integrated WEFNC nexus analysis"
+    contents:
+      - nexus_summary
+      - nexus_sustainability_score
+      - nexus_index
+      - nexus_tradeoff
+      - nexus_radar
+      - nexus_heatmap
+      - nexus_radar_gg
+      - nexus_heatmap_gg
+      - nexus_sensitivity
+      - plot_sensitivity
+
+  - title: "🔧 Utilities"
+    desc: "Helper and normalization functions"
+    contents:
+      - normalize_minmax
+      - normalize_zscore
+
+  - title: "📊 Data"
+    desc: "Sample datasets"
+    contents:
+      - arid_pulse_nexus
+
+  - title: "🖨️ S3 Methods"
+    desc: "Print, summary, and plot methods for result objects"
+    contents:
+      - print.nexus_result
+      - summary.nexus_result
+      - plot.nexus_result
+      - print.cf_result
+      - plot.cf_result
+      - print.sustainability_result
