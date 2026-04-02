@@ -1,0 +1,11 @@
+^\.github$
+^_pkgdown\.yml$
+^\.Rproj\.user$
+^.*\.Rproj$
+^\.gitignore$
+^CONTRIBUTING\.md$
+^CODE_OF_CONDUCT\.md$
+^SECURITY\.md$
+^cran-comments\.md$
+^\.git$
+^docs$
