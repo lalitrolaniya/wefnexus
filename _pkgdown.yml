@@ -5,33 +5,20 @@ template:
   bootswatch: cosmo
 
 home:
-  title: "wefnexus — WEFNC Nexus Analysis for Agriculture"
-  description: >
-    R package for Water-Energy-Food-Nutrient-Carbon nexus analysis
-    in agricultural production systems. 52 functions across 6 modules.
-  links:
-    - text: CRAN page
-      href: https://CRAN.R-project.org/package=wefnexus
-    - text: DOI
-      href: https://doi.org/10.32614/CRAN.package.wefnexus
+  title: wefnexus
+  description: R package for WEFNC nexus analysis in agriculture
 
 navbar:
   structure:
-    left:  [intro, reference, articles, news]
+    left: [intro, reference, articles, news]
     right: [search, github]
   components:
     github:
       icon: fa-github
       href: https://github.com/lalitrolaniya/wefnexus
-      aria-label: GitHub
-
-authors:
-  Lalit Kumar Rolaniya:
-    href: https://github.com/lalitrolaniya
 
 reference:
-  - title: "Water Module"
-    desc: "Water use efficiency and footprint analysis"
+  - title: Water Module
     contents:
       - water_use_efficiency
       - crop_water_productivity
@@ -41,8 +28,7 @@ reference:
       - crop_water_stress_index
       - depleted_fraction
 
-  - title: "Energy Module"
-    desc: "Energy balance and efficiency analysis"
+  - title: Energy Module
     contents:
       - energy_input
       - energy_output
@@ -55,8 +41,7 @@ reference:
       - specific_energy
       - human_energy_profitability
 
-  - title: "Food Module"
-    desc: "Food productivity and nutritional analysis"
+  - title: Food Module
     contents:
       - food_productivity_index
       - harvest_index
@@ -67,8 +52,7 @@ reference:
       - protein_yield
       - caloric_yield
 
-  - title: "Nutrient Module"
-    desc: "Nutrient use efficiency analysis"
+  - title: Nutrient Module
     contents:
       - partial_factor_productivity
       - agronomic_efficiency
@@ -79,8 +63,7 @@ reference:
       - nutrient_use_efficiency
       - nutrient_balance
 
-  - title: "Carbon Module"
-    desc: "Carbon footprint and GHG analysis"
+  - title: Carbon Module
     contents:
       - carbon_footprint
       - ghg_emission
@@ -90,8 +73,7 @@ reference:
       - carbon_sustainability_index
       - carbon_sequestration_rate
 
-  - title: "Nexus Integration"
-    desc: "Integrated WEFNC nexus analysis"
+  - title: Nexus Integration
     contents:
       - nexus_summary
       - nexus_sustainability_score
@@ -104,22 +86,20 @@ reference:
       - nexus_sensitivity
       - plot_sensitivity
 
-  - title: "Utilities"
-    desc: "Helper and normalization functions"
+  - title: Utilities
     contents:
       - normalize_minmax
       - normalize_zscore
-- title: "Package"
-    desc: "Package overview"
+
+  - title: Package
     contents:
       - wefnexus-package
-  - title: "Data"
-    desc: "Sample datasets"
+
+  - title: Data
     contents:
       - arid_pulse_nexus
 
-  - title: "S3 Methods"
-    desc: "Print, summary, and plot methods"
+  - title: S3 Methods
     contents:
       - print.nexus_result
       - summary.nexus_result
