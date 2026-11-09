@@ -128,6 +128,10 @@ nexus_weights <- function(data, method = c("entropy", "critic", "pca",
         s <- apply(zv, 2, stats::sd, na.rm = TRUE)
         r <- suppressWarnings(stats::cor(zv, use = "pairwise.complete.obs"))
         r[is.na(r)] <- 0
+        # Perfectly correlated indicators can give r = 0.9999999999999998
+        # on some platforms; treat that rounding noise as exactly 1.
+        r <- pmin(pmax(r, -1), 1)
+        r[abs(1 - r) < 1e-10] <- 1
         cj[varying] <- s * colSums(1 - r)
       }
       cj
@@ -150,7 +154,8 @@ nexus_weights <- function(data, method = c("entropy", "critic", "pca",
   )
   if (sum(w) <= 0) {
     if (any(varying)) {
-      warning("The indicators are perfectly correlated, so ", method,
+      warning("The indicators are perfectly correlated, so ",
+              switch(method, critic = "CRITIC", pca = "PCA", method),
               " weights are undefined; using equal weights.", call. = FALSE)
     } else {
       warning("No indicator varies across treatments; using equal weights.",
