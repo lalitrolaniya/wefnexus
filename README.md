@@ -2,7 +2,7 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/lalitrolaniya/wefnexus/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/lalitrolaniya/wefnexus/actions/workflows/R-CMD-check.yaml)
-[![CRAN status](https://www.r-pkg.org/badges/version/wefnexus)](https://CRAN.R-project.org/package=wefnexus)
+[![CRAN status](https://img.shields.io/cran/v/wefnexus?label=CRAN)](https://CRAN.R-project.org/package=wefnexus)
 [![DOI](https://img.shields.io/badge/DOI-10.32614/CRAN.package.wefnexus-blue)](https://doi.org/10.32614/CRAN.package.wefnexus)
 [![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://cran.r-project.org/web/licenses/GPL-3)
 [![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/wefnexus)](https://CRAN.R-project.org/package=wefnexus)
