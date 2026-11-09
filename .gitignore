@@ -4,4 +4,9 @@
 .Ruserdata
 .DS_Store
 *.Rproj.user
+.Rproj.user/
 inst/doc
+docs/
+*.Rcheck/
+*.tar.gz
+tests/testthat/Rplots.pdf

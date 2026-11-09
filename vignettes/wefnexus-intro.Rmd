@@ -11,6 +11,9 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(wefnexus)
+# Silence informational messages from all wefnexus functions
+options(wefnexus.verbose = FALSE)
+has_gg <- requireNamespace("ggplot2", quietly = TRUE)
 ```
 
 ## Introduction
@@ -19,6 +22,10 @@ The **wefnexus** package provides a comprehensive toolkit for analyzing
 Water-Energy-Food-Nutrient-Carbon (WEFNC) nexus interactions in agricultural
 production systems. This vignette demonstrates a complete workflow using a
 conservation agriculture dataset from western Rajasthan, India.
+
+If you have replicated field data and want the whole analysis in one
+step, jump to [Section 7](#workflow). Sections 1 to 6 show the
+individual modules.
 
 ## Load Sample Data
 
@@ -66,6 +73,42 @@ data.frame(Treatment = d$treatment, EUE = eue, EROI = eroi_values,
            Net_Energy = ne)
 ```
 
+### Energy budget from physical quantities
+
+Most field records hold litres of diesel, kilograms of fertilizer and
+labour hours rather than megajoules. `energy_budget()` converts them with
+the `energy_coefficients` table and splits input energy into direct,
+indirect, renewable and non-renewable shares.
+
+```{r energy-budget}
+head(energy_coefficients[, c("input", "unit", "mj_per_unit", "form",
+                             "source")])
+
+inputs <- data.frame(
+  treatment = c("CT+Flood", "ZT+Drip"),
+  human_labour_man = c(320, 240),
+  diesel = c(65, 38),
+  electricity = c(180, 75),
+  nitrogen = c(20, 20),
+  phosphorus = c(40, 40),
+  seed = c(20, 20),
+  herbicide = c(0, 0.75),
+  grain = c(980, 1280),
+  straw = c(1450, 1850)
+)
+eb <- energy_budget(inputs)
+eb$summary[, c("treatment", "total_input_MJ", "direct_pct",
+               "renewable_pct", "EUE", "energy_intensity_MJ_kg")]
+```
+
+Energy equivalents vary between sources. To use your own, edit a copy of
+the table and pass it as `coefficients`.
+
+```{r energy-plot, fig.width = 7.5, fig.height = 3.4, eval = has_gg}
+plot(eb)
+plot(eb, type = "source", percent = TRUE)
+```
+
 ## 3. Food Module
 
 ```{r food}
@@ -93,6 +136,10 @@ data.frame(Treatment = d$treatment, PFP_N = pfp, NHI_N = nhi)
 
 ## 5. Carbon Module
 
+The default direct N2O emission factor is the IPCC Tier 1 value of
+0.01. For dry climates the 2019 IPCC Refinement gives 0.005, which can be
+set with `ef_n2o`.
+
 ```{r carbon}
 # Carbon Footprint (IPCC AR6 GWP: CH4=27, N2O=273)
 cf <- carbon_footprint(
@@ -100,7 +147,8 @@ cf <- carbon_footprint(
   electricity_use = d$electricity_kwh[1],
   n_fertilizer = d$n_applied[1],
   p_fertilizer = d$p_applied[1],
-  yield = d$grain_yield[1]
+  yield = d$grain_yield[1],
+  ef_n2o = 0.005
 )
 cf$breakdown
 
@@ -115,6 +163,11 @@ gwp20 <- global_warming_potential(co2 = 500, ch4 = 10, n2o = 2,
 
 ## 6. Nexus Integration
 
+Every treatment in this trial received the same starter dose of 20 kg
+N/ha, so partial factor productivity would only mirror yield. The
+nutrient dimension therefore uses internal N utilization efficiency
+(`nutrient_metric = "iue"`), and carbon is scored per kg of grain.
+
 ```{r nexus}
 # Full Nexus Summary
 ns <- nexus_summary(
@@ -125,7 +178,9 @@ ns <- nexus_summary(
   n_applied = d$n_applied,
   n_uptake = d$n_uptake,
   carbon_emission = d$ghg_emission,
-  treatment_names = d$treatment
+  treatment_names = d$treatment,
+  nutrient_metric = "iue",
+  carbon_basis = "intensity"
 )
 ns[, c("treatment", "EROI", "nexus_index")]
 ```
@@ -151,6 +206,114 @@ nss <- nexus_sustainability_score(
 nss[, c("nexus_score", "category")]
 ```
 
+### Objective weights and TOPSIS ranking
+
+Equal weights are a value judgement. `nexus_weights()` derives weights
+from the data (entropy, CRITIC or PCA), and `nexus_topsis()` ranks
+treatments on raw indicators in their own units.
+
+```{r weights}
+ind <- data.frame(
+  WUE = ns$WUE_kg_mm,
+  EUE = ns$EUE_ratio,
+  Yield = ns$yield_kg_ha,
+  IUE = ns$IUE_kg_kgN,
+  CI = ns$carbon_intensity
+)
+benefit <- c(TRUE, TRUE, TRUE, TRUE, FALSE)  # lower carbon intensity is better
+
+rbind(
+  entropy = nexus_weights(ind, "entropy", benefit),
+  critic  = nexus_weights(ind, "critic", benefit),
+  pca     = nexus_weights(ind, "pca", benefit)
+)
+
+nexus_topsis(ind, weights = "entropy", benefit = benefit,
+             treatment_names = d$treatment)
+```
+
+### Is the ranking robust?
+
+A recommendation is more convincing when it does not depend on one
+choice of weights. `nexus_rank_compare()` ranks the treatments eight ways
+(composite index and TOPSIS, each with equal, entropy, CRITIC and PCA
+weights) and measures agreement with Kendall's W (0 = none, 1 = identical
+rankings).
+
+```{r robustness}
+rc <- nexus_rank_compare(ind, benefit = benefit,
+                         treatment_names = d$treatment)
+rc
+```
+
+```{r robustness-plot, fig.width = 8, fig.height = 4.2, eval = has_gg}
+plot(rc)
+```
+
+### Synergies and trade-offs
+
+`nexus_tradeoff()` returns the correlation matrix with p-values attached;
+`plot_tradeoff()` draws it. Carbon intensity is lower-is-better, so pass
+`benefit` to orient the indicators: blue then always means the two
+improve together (synergy) and red means one improves as the other gets
+worse (trade-off).
+
+```{r tradeoff, fig.width = 6, fig.height = 4.8, eval = has_gg}
+plot_tradeoff(nexus_tradeoff(ind), benefit = benefit)
+```
+
+## 7. One-call workflow for replicated trials {#workflow}
+
+`arid_pulse_trial` holds plot-level data from a randomized complete
+block design with three replications. `nexus_analysis()` computes
+plot-level indicators, runs ANOVA, builds the nexus index from treatment
+means and ranks treatments by TOPSIS.
+
+```{r workflow}
+data(arid_pulse_trial)
+res <- nexus_analysis(
+  arid_pulse_trial,
+  treatment = "treatment", block = "replication",
+  yield = "grain_yield", water = "total_water",
+  energy_in = "energy_input", energy_out = "energy_output",
+  emission = "ghg_emission", n_uptake = "n_uptake",
+  weights = "entropy", carbon_basis = "intensity"
+)
+res
+```
+
+The ANOVA table is laid out as in most agronomy journals: means followed
+by letter groups (Fisher's LSD), then SEm, CD at 5 percent and CV.
+
+```{r anova}
+res$anova
+```
+
+`nexus_anova()` can also be used on its own for any set of response
+variables, in a CRD (no `block`) or RCBD.
+
+### Figures for the manuscript
+
+Every result has a `plot()` method that returns a ggplot2 object, so you
+can add your own theme or labels and save it with `ggplot2::ggsave()`.
+
+```{r fig-anova, fig.width = 8, fig.height = 5.6, eval = has_gg}
+plot(res$anova, response = c("grain_yield", "WUE", "EUE", "CI"),
+     labels = c(grain_yield = "Grain yield (kg/ha)",
+                WUE = "WUE (kg/ha/mm)",
+                EUE = "Energy use efficiency",
+                CI = "Carbon intensity (kg CO2-eq/kg)"),
+     ncol = 2)
+```
+
+```{r fig-radar, fig.width = 8, fig.height = 5.4, eval = has_gg}
+plot(res)                    # one radar per treatment
+```
+
+```{r fig-topsis, fig.width = 7, fig.height = 3.4, eval = has_gg}
+plot(res, which = "topsis")
+```
+
 ## References
 
 - Hoekstra, A.Y. et al. (2011). The Water Footprint Assessment Manual.
@@ -163,3 +326,12 @@ nss[, c("nexus_score", "category")]
   budget, climate feedbacks, and climate sensitivity.
 - Lal, R. (2004). Carbon emission from farm operations. Environment
   International, 30(7), 981-990.
+- Diakoulaki, D., Mavrotas, G. & Papayannakis, L. (1995). Determining
+  objective weights in multiple criteria problems: The CRITIC method.
+  Computers & Operations Research, 22(7), 763-770.
+- Hwang, C.L. & Yoon, K. (1981). Multiple Attribute Decision Making:
+  Methods and Applications. Springer, Berlin.
+- Gomez, K.A. & Gomez, A.A. (1984). Statistical Procedures for
+  Agricultural Research, 2nd ed. Wiley, New York.
+- Kendall, M.G. & Babington Smith, B. (1939). The problem of m rankings.
+  The Annals of Mathematical Statistics, 10(3), 275-287.

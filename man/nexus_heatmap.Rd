@@ -23,7 +23,8 @@ and columns represent nexus dimensions.}
 \item{title}{Character. Plot title. Default "WEFNC Nexus Heatmap".}
 
 \item{color_palette}{Character vector of colors for gradient.
-Default is a red-yellow-green palette.}
+Default is a single-hue blue scale that stays readable with colour
+vision deficiency (version 1.0.0 used red-yellow-green).}
 }
 \value{
 Invisibly returns the input \code{scores} matrix. Called

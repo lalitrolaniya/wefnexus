@@ -7,7 +7,7 @@
 nutrient_harvest_index(
   grain_nutrient_uptake,
   total_nutrient_uptake,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -18,7 +18,8 @@ nutrient_harvest_index(
 uptake (kg/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Nutrient harvest index (proportion, 0 to 1).
@@ -27,7 +28,9 @@ Numeric vector. Nutrient harvest index (proportion, 0 to 1).
 Proportion of total plant nutrient partitioned to grain.
 }
 \details{
-Formula: \deqn{HI = \frac{Economic Yield}{Biological Yield}}{HI = Economic Yield / Biological Yield}
+Formula: \deqn{NHI = \frac{U_{grain}}{U_{total}}}{NHI = U_grain / U_total}
+  where \eqn{U_{grain}} is nutrient uptake in grain and
+  \eqn{U_{total}} is total plant nutrient uptake (kg/ha).
 }
 \examples{
 nutrient_harvest_index(grain_nutrient_uptake = 75,

@@ -12,7 +12,8 @@
 #'   control plot (kg/ha).
 #' @param nutrient_applied Numeric vector. Amount of nutrient applied (kg/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Agronomic efficiency (kg grain per kg nutrient).
 #'
@@ -40,7 +41,7 @@
 #'
 #' @export
 agronomic_efficiency <- function(yield_treated, yield_control,
-                                 nutrient_applied, verbose = TRUE) {
+                                 nutrient_applied, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield_treated, "yield_treated")
   .validate_numeric(yield_control, "yield_control")
   .validate_positive(nutrient_applied, "nutrient_applied")
@@ -60,7 +61,8 @@ agronomic_efficiency <- function(yield_treated, yield_control,
 #' @param uptake_control Numeric vector. Total nutrient uptake without
 #'   fertilizer (kg/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Physiological efficiency (kg grain per kg
 #'   nutrient uptake). Returns \code{NA} where uptake difference is zero.
@@ -75,7 +77,7 @@ agronomic_efficiency <- function(yield_treated, yield_control,
 #' @export
 physiological_efficiency <- function(yield_treated, yield_control,
                                      uptake_treated, uptake_control,
-                                     verbose = TRUE) {
+                                     verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield_treated, "yield_treated")
   .validate_numeric(yield_control, "yield_control")
   .validate_numeric(uptake_treated, "uptake_treated")
@@ -100,7 +102,8 @@ physiological_efficiency <- function(yield_treated, yield_control,
 #'   fertilizer (kg/ha).
 #' @param nutrient_applied Numeric vector. Nutrient applied (kg/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Recovery efficiency as a proportion (0 to 1,
 #'   but can exceed 1 due to priming effects or added benefits).
@@ -114,7 +117,7 @@ physiological_efficiency <- function(yield_treated, yield_control,
 #'
 #' @export
 recovery_efficiency <- function(uptake_treated, uptake_control,
-                                nutrient_applied, verbose = TRUE) {
+                                nutrient_applied, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(uptake_treated, "uptake_treated")
   .validate_numeric(uptake_control, "uptake_control")
   .validate_positive(nutrient_applied, "nutrient_applied")
@@ -131,7 +134,8 @@ recovery_efficiency <- function(uptake_treated, uptake_control,
 #' @param yield Numeric vector. Crop yield (kg/ha).
 #' @param nutrient_applied Numeric vector. Nutrient applied (kg/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Partial factor productivity (kg yield per
 #'   kg nutrient applied).
@@ -144,7 +148,7 @@ recovery_efficiency <- function(uptake_treated, uptake_control,
 #'
 #' @export
 partial_factor_productivity <- function(yield, nutrient_applied,
-                                        verbose = TRUE) {
+                                        verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield, "yield")
   .validate_positive(nutrient_applied, "nutrient_applied")
   .validate_same_length(yield, nutrient_applied)
@@ -163,7 +167,8 @@ partial_factor_productivity <- function(yield, nutrient_applied,
 #' @param yield Numeric vector. Crop yield (kg/ha).
 #' @param total_uptake Numeric vector. Total plant nutrient uptake (kg/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Internal utilization efficiency (kg yield per
 #'   kg nutrient uptake).
@@ -173,7 +178,7 @@ partial_factor_productivity <- function(yield, nutrient_applied,
 #'
 #' @export
 internal_utilization_efficiency <- function(yield, total_uptake,
-                                            verbose = TRUE) {
+                                            verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield, "yield")
   .validate_positive(total_uptake, "total_uptake")
   .validate_same_length(yield, total_uptake)
@@ -187,14 +192,17 @@ internal_utilization_efficiency <- function(yield, total_uptake,
 #' Proportion of total plant nutrient partitioned to grain.
 #'
 #'
-#' @details Formula: \deqn{HI = \frac{Economic Yield}{Biological Yield}}{HI = Economic Yield / Biological Yield}
+#' @details Formula: \deqn{NHI = \frac{U_{grain}}{U_{total}}}{NHI = U_grain / U_total}
+#'   where \eqn{U_{grain}} is nutrient uptake in grain and
+#'   \eqn{U_{total}} is total plant nutrient uptake (kg/ha).
 #'
 #' @param grain_nutrient_uptake Numeric vector. Nutrient uptake in grain
 #'   (kg/ha).
 #' @param total_nutrient_uptake Numeric vector. Total plant nutrient
 #'   uptake (kg/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Nutrient harvest index (proportion, 0 to 1).
 #'
@@ -205,7 +213,7 @@ internal_utilization_efficiency <- function(yield, total_uptake,
 #' @export
 nutrient_harvest_index <- function(grain_nutrient_uptake,
                                    total_nutrient_uptake,
-                                   verbose = TRUE) {
+                                   verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(grain_nutrient_uptake, "grain_nutrient_uptake")
   .validate_positive(total_nutrient_uptake, "total_nutrient_uptake")
   .validate_same_length(grain_nutrient_uptake, total_nutrient_uptake)
@@ -228,7 +236,8 @@ nutrient_harvest_index <- function(grain_nutrient_uptake,
 #' @param p_output Numeric. Total P removal or uptake (kg/ha).
 #' @param k_output Numeric. Total K removal or uptake (kg/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return A data frame with five columns:
 #' \describe{
@@ -237,26 +246,35 @@ nutrient_harvest_index <- function(grain_nutrient_uptake,
 #'   \item{output_kg_ha}{Numeric. Total nutrient output (kg/ha)}
 #'   \item{balance_kg_ha}{Numeric. Balance: input minus output (kg/ha).
 #'     Positive = surplus; negative = depletion}
-#'   \item{output_input_ratio}{Numeric. Output to input ratio}
+#'   \item{output_input_ratio}{Numeric. Output to input ratio
+#'     (\code{NA} when the input is zero)}
 #' }
+#'
+#' @details Zero inputs are allowed (for example no K applied), giving
+#'   a negative balance that shows nutrient mining.
 #'
 #' @examples
 #' nutrient_balance(n_input = 120, p_input = 60, k_input = 40,
 #'                  n_output = 95, p_output = 25, k_output = 80)
+#' # No potassium applied: balance shows K mining
+#' nutrient_balance(n_input = 20, p_input = 40, k_input = 0,
+#'                  n_output = 56.8, p_output = 8.2, k_output = 45)
 #'
 #' @export
 nutrient_balance <- function(n_input, p_input, k_input,
                              n_output, p_output, k_output,
-                             verbose = TRUE) {
+                             verbose = getOption("wefnexus.verbose", TRUE)) {
   inputs <- c(n_input, p_input, k_input)
   outputs <- c(n_output, p_output, k_output)
-  if (any(inputs <= 0)) stop("All inputs must be positive.", call. = FALSE)
+  .validate_non_negative(inputs, "nutrient inputs")
+  .validate_non_negative(outputs, "nutrient outputs")
   result <- data.frame(
     nutrient = c("N", "P", "K"),
     input_kg_ha = inputs,
     output_kg_ha = outputs,
     balance_kg_ha = round(inputs - outputs, 2),
-    output_input_ratio = round(outputs / inputs, 3),
+    output_input_ratio = ifelse(inputs > 0, round(outputs / inputs, 3),
+                                NA_real_),
     stringsAsFactors = FALSE
   )
   if (verbose) message("Nutrient balance sheet computed for N, P, K.")
@@ -269,7 +287,12 @@ nutrient_balance <- function(n_input, p_input, k_input,
 #' nutrient in a single call.
 #'
 #'
-#' @details Formula: \deqn{NUE = \frac{Yield}{Nutrient Applied}}
+#' @details Returns agronomic efficiency (AE), physiological efficiency
+#'   (PE), recovery efficiency (RE), partial factor productivity (PFP),
+#'   internal utilization efficiency (IUE) and nutrient harvest index
+#'   (NHI). See the individual functions for formulas. Versions before
+#'   1.1.0 returned a fixed NHI of 0.75; NHI is now computed from
+#'   \code{grain_uptake}.
 #'
 #' @param yield_treated Numeric. Yield with nutrient applied (kg/ha).
 #' @param yield_control Numeric. Yield without nutrient (kg/ha).
@@ -280,8 +303,13 @@ nutrient_balance <- function(n_input, p_input, k_input,
 #'   fertilizer (kg/ha).
 #' @param nutrient_name Character. Name of the nutrient for labeling
 #'   (e.g., "N", "P", "K"). Default "N".
+#' @param grain_uptake Numeric. Nutrient uptake in grain of the treated
+#'   crop (kg/ha). Used to compute the nutrient harvest index. If
+#'   \code{NULL} (default), the nutrient harvest index is returned as
+#'   \code{NA}.
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return A data frame with one row and seven columns:
 #' \describe{
@@ -293,15 +321,16 @@ nutrient_balance <- function(n_input, p_input, k_input,
 #'     (kg/kg)}
 #'   \item{internal_util_eff}{Numeric. Internal utilization efficiency
 #'     (kg/kg)}
-#'   \item{nutrient_harvest_idx}{Numeric. Estimated nutrient harvest
-#'     index (proportion, based on 0.75 grain-to-total ratio assumption)}
+#'   \item{nutrient_harvest_idx}{Numeric. Nutrient harvest index
+#'     (grain uptake / total uptake). \code{NA} when
+#'     \code{grain_uptake} is not supplied.}
 #' }
 #'
 #' @examples
 #' nutrient_use_efficiency(
 #'   yield_treated = 4500, yield_control = 3000,
 #'   nutrient_applied = 120, uptake_treated = 100,
-#'   uptake_control = 60, nutrient_name = "N"
+#'   uptake_control = 60, nutrient_name = "N", grain_uptake = 72
 #' )
 #'
 #' @references
@@ -319,7 +348,8 @@ nutrient_use_efficiency <- function(yield_treated, yield_control,
                                     nutrient_applied,
                                     uptake_treated, uptake_control,
                                     nutrient_name = "N",
-                                    verbose = TRUE) {
+                                    grain_uptake = NULL,
+                                    verbose = getOption("wefnexus.verbose", TRUE)) {
   ae <- agronomic_efficiency(yield_treated, yield_control,
                              nutrient_applied, verbose = FALSE)
   pe <- physiological_efficiency(yield_treated, yield_control,
@@ -331,8 +361,11 @@ nutrient_use_efficiency <- function(yield_treated, yield_control,
                                      verbose = FALSE)
   iue <- internal_utilization_efficiency(yield_treated, uptake_treated,
                                          verbose = FALSE)
-  # Estimated NHI (assuming ~75% of uptake goes to grain)
-  nhi <- round(uptake_treated * 0.75 / uptake_treated, 4)
+  nhi <- if (is.null(grain_uptake)) {
+    rep(NA_real_, length(ae))
+  } else {
+    nutrient_harvest_index(grain_uptake, uptake_treated, verbose = FALSE)
+  }
 
   result <- data.frame(
     nutrient = nutrient_name,

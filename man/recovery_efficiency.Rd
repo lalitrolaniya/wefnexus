@@ -8,7 +8,7 @@ recovery_efficiency(
   uptake_treated,
   uptake_control,
   nutrient_applied,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -21,7 +21,8 @@ fertilizer (kg/ha).}
 \item{nutrient_applied}{Numeric vector. Nutrient applied (kg/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Recovery efficiency as a proportion (0 to 1,

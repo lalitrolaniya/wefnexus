@@ -105,7 +105,9 @@ test_that("carbon_sustainability_index: with sequestration", {
 test_that("ghg_emission: scalar returns source breakdown", {
   ghg <- ghg_emission(120, verbose = FALSE)
   expect_s3_class(ghg, "data.frame")
-  expect_equal(nrow(ghg), 4)
+  expect_equal(nrow(ghg), 6)
+  expect_true("counted" %in% names(ghg))
+  expect_equal(attr(ghg, "total_CO2eq"), sum(ghg$CO2_eq_kg[ghg$counted]))
   expect_true(all(c("source", "gas", "emission_kg", "CO2_eq_kg") %in%
                     names(ghg)))
 })
@@ -200,7 +202,7 @@ test_that("S3 print.nexus_result works", {
   ns <- nexus_summary(
     yield = c(4500, 3800), water_consumed = c(450, 350),
     energy_input = c(12000, 9500), energy_output = c(135000, 112000),
-    n_applied = c(120, 120), n_uptake = c(100, 80),
+    n_applied = c(120, 100), n_uptake = c(100, 80),
     carbon_emission = c(2500, 1800), verbose = FALSE
   )
   expect_s3_class(ns, "nexus_result")

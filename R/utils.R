@@ -39,6 +39,9 @@
   if (length(w) != n) {
     stop(sprintf("'weights' must have exactly %d elements.", n), call. = FALSE)
   }
+  if (!is.numeric(w) || anyNA(w) || any(w < 0)) {
+    stop("'weights' must be non-negative numbers.", call. = FALSE)
+  }
   if (abs(sum(w) - 1) > 1e-6) {
     stop("'weights' must sum to 1.", call. = FALSE)
   }

@@ -8,7 +8,11 @@ nexus_radar_gg(
   scores,
   treatment_names = NULL,
   dim_labels = c("Water", "Energy", "Food", "Nutrient", "Carbon"),
-  title = "WEFNC Nexus Profile"
+  title = "WEFNC Nexus Profile",
+  facet = FALSE,
+  reference = TRUE,
+  colours = NULL,
+  ncol = NULL
 )
 }
 \arguments{
@@ -21,12 +25,29 @@ as columns). Values should be on a 0 to 1 scale.}
 Default: Water, Energy, Food, Nutrient, Carbon.}
 
 \item{title}{Character. Plot title.}
+
+\item{facet}{Logical. If \code{TRUE}, draws one panel per treatment
+(small multiples), which stays readable with many treatments.
+Default \code{FALSE} (all treatments overlaid).}
+
+\item{reference}{Logical. With \code{facet = TRUE}, draws the mean
+profile of all treatments as a grey outline in every panel for
+comparison. Default \code{TRUE}.}
+
+\item{colours}{Character vector of colours, one per treatment. Default
+is a colour-blind-checked palette (up to 8 treatments).}
+
+\item{ncol}{Integer. Number of panel columns when \code{facet = TRUE}.}
 }
 \value{
 A ggplot2 object.
 }
 \description{
 Publication-quality radar chart using ggplot2 for WEFNC nexus profiles.
+}
+\details{
+Overlaid radars become hard to read beyond three or four
+  treatments; use \code{facet = TRUE} for more.
 }
 \examples{
 \donttest{
@@ -35,6 +56,7 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
                       0.72, 0.80, 0.85, 0.70, 0.60),
                    nrow = 2, byrow = TRUE)
   nexus_radar_gg(scores, treatment_names = c("CA", "CT"))
+  nexus_radar_gg(scores, treatment_names = c("CA", "CT"), facet = TRUE)
 }
 }
 

@@ -12,7 +12,7 @@ nexus_sustainability_score(
   carbon_score,
   weights = rep(0.2, 5),
   thresholds = c(0.4, 0.6, 0.8),
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -33,7 +33,8 @@ sustainability categories: c(low, medium, high). Default
 c(0.4, 0.6, 0.8).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 A data frame with columns:
@@ -53,7 +54,9 @@ Comprehensive sustainability score with categorization based on
 user-defined thresholds.
 }
 \details{
-Formula: \deqn{NSS = \frac{1}{n} \sum_{i=1}^{n} S_i}{NSS = mean(S_i)} where S_i are normalized sub-dimension scores.
+Formula: \deqn{NSS = \sum_{i=1}^{5} w_i S_i}{NSS = sum(w_i * S_i)}
+  where \eqn{S_i} are the dimension scores and \eqn{w_i} the weights
+  (equal weights give the mean).
 }
 \examples{
 \donttest{

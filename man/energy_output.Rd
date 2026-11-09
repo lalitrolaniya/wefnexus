@@ -9,7 +9,7 @@ energy_output(
   straw_yield = 0,
   grain_energy_coeff = 14.7,
   straw_energy_coeff = 12.5,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -25,7 +25,8 @@ Default 14.7 (wheat grain equivalent).}
 Default 12.5 (wheat straw equivalent).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Total energy output (MJ/ha).

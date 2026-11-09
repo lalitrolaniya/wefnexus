@@ -1,0 +1,93 @@
+url: https://lalitrolaniya.github.io/wefnexus/
+template:
+  bootstrap: 5
+
+reference:
+- title: One-call workflow
+  contents:
+  - nexus_analysis
+  - nexus_anova
+- title: Water
+  contents:
+  - water_use_efficiency
+  - water_productivity
+  - water_footprint
+  - irrigation_efficiency
+  - crop_water_stress_index
+  - crop_water_productivity
+  - depleted_fraction
+- title: Energy
+  contents:
+  - energy_budget
+  - energy_input
+  - energy_output
+  - energy_use_efficiency
+  - eroi
+  - energy_productivity
+  - energy_intensity
+  - specific_energy
+  - net_energy
+  - energy_profitability
+  - human_energy_profitability
+- title: Food
+  contents:
+  - food_productivity_index
+  - crop_yield_index
+  - harvest_index
+  - land_equivalent_ratio
+  - system_productivity_index
+  - caloric_yield
+  - protein_yield
+  - production_efficiency_index
+- title: Nutrient
+  contents:
+  - agronomic_efficiency
+  - physiological_efficiency
+  - recovery_efficiency
+  - partial_factor_productivity
+  - internal_utilization_efficiency
+  - nutrient_harvest_index
+  - nutrient_balance
+  - nutrient_use_efficiency
+- title: Carbon
+  contents:
+  - carbon_footprint
+  - carbon_efficiency
+  - carbon_sustainability_index
+  - ghg_emission
+  - soil_carbon_stock
+  - carbon_sequestration_rate
+  - global_warming_potential
+- title: Nexus integration
+  contents:
+  - normalize_minmax
+  - normalize_zscore
+  - nexus_index
+  - nexus_weights
+  - nexus_topsis
+  - nexus_rank_compare
+  - nexus_tradeoff
+  - nexus_sensitivity
+  - nexus_sustainability_score
+  - nexus_summary
+- title: Plots
+  contents:
+  - plot_tradeoff
+  - nexus_radar
+  - nexus_radar_gg
+  - nexus_heatmap
+  - nexus_heatmap_gg
+  - plot_sensitivity
+- title: Datasets
+  contents:
+  - arid_pulse_nexus
+  - arid_pulse_trial
+  - energy_coefficients
+- title: Methods
+  contents:
+  - starts_with("print.")
+  - starts_with("plot.")
+  - starts_with("summary.")
+- title: Package
+  contents:
+  - wefnexus-package

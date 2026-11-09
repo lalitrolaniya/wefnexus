@@ -4,7 +4,11 @@
 \alias{internal_utilization_efficiency}
 \title{Internal Utilization Efficiency (IUE)}
 \usage{
-internal_utilization_efficiency(yield, total_uptake, verbose = TRUE)
+internal_utilization_efficiency(
+  yield,
+  total_uptake,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{yield}{Numeric vector. Crop yield (kg/ha).}
@@ -12,7 +16,8 @@ internal_utilization_efficiency(yield, total_uptake, verbose = TRUE)
 \item{total_uptake}{Numeric vector. Total plant nutrient uptake (kg/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Internal utilization efficiency (kg yield per

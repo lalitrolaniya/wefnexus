@@ -71,7 +71,8 @@ normalize_zscore <- function(x) {
 #'   Food, Nutrient, and Carbon dimensions. Must sum to 1. Default is
 #'   equal weighting (0.2 each).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Composite nexus index on a 0 to 1 scale,
 #'   where higher values indicate better overall sustainability.
@@ -89,8 +90,16 @@ normalize_zscore <- function(x) {
 #' @export
 nexus_index <- function(water_score, energy_score, food_score,
                         nutrient_score, carbon_score,
-                        weights = rep(0.2, 5), verbose = TRUE) {
+                        weights = rep(0.2, 5), verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_weights(weights, 5)
+  sc <- list(water_score = water_score, energy_score = energy_score,
+             food_score = food_score, nutrient_score = nutrient_score,
+             carbon_score = carbon_score)
+  for (nm in names(sc)) .validate_proportion(sc[[nm]], nm)
+  lens <- lengths(sc)
+  if (length(unique(lens[lens != 1])) > 1) {
+    stop("All score vectors must have the same length.", call. = FALSE)
+  }
   ni <- weights[1] * water_score + weights[2] * energy_score +
     weights[3] * food_score + weights[4] * nutrient_score +
     weights[5] * carbon_score
@@ -108,11 +117,18 @@ nexus_index <- function(water_score, energy_score, food_score,
 #' @param method Character. Correlation method: \code{"pearson"}
 #'   (default), \code{"spearman"}, or \code{"kendall"}.
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return A numeric correlation matrix with pairwise correlations.
-#'   Positive values suggest synergies; negative values suggest
-#'   trade-offs between dimensions.
+#'   When all indicators are higher-is-better, positive values suggest
+#'   synergies and negative values trade-offs; for a lower-is-better
+#'   indicator (such as carbon footprint) the reading reverses. The p-values of the pairwise
+#'   correlation tests (\code{\link[stats]{cor.test}}) and the number of
+#'   complete pairs are attached as \code{attr(, "p_values")} and
+#'   \code{attr(, "n")}. The result has class \code{tradeoff_matrix} and
+#'   behaves as an ordinary matrix; \code{plot()} or
+#'   \code{\link{plot_tradeoff}} draws it.
 #'
 #' @examples
 #' \donttest{
@@ -125,17 +141,35 @@ nexus_index <- function(water_score, energy_score, food_score,
 #'
 #' }
 #' @export
-nexus_tradeoff <- function(data, method = "pearson", verbose = TRUE) {
+nexus_tradeoff <- function(data, method = "pearson", verbose = getOption("wefnexus.verbose", TRUE)) {
   if (!is.data.frame(data)) stop("'data' must be a data frame.", call. = FALSE)
   method <- match.arg(method, c("pearson", "spearman", "kendall"))
   num_cols <- sapply(data, is.numeric)
   if (sum(num_cols) < 2) {
     stop("Need at least 2 numeric columns.", call. = FALSE)
   }
-  cor_mat <- stats::cor(data[, num_cols], use = "pairwise.complete.obs",
-                        method = method)
+  x <- data[, num_cols, drop = FALSE]
+  cor_mat <- stats::cor(x, use = "pairwise.complete.obs", method = method)
+  k <- ncol(x)
+  p_mat <- matrix(NA_real_, k, k, dimnames = dimnames(cor_mat))
+  n_mat <- matrix(NA_integer_, k, k, dimnames = dimnames(cor_mat))
+  for (i in seq_len(k)) {
+    for (j in seq_len(k)) {
+      ok <- stats::complete.cases(x[[i]], x[[j]])
+      n_mat[i, j] <- sum(ok)
+      if (i != j && sum(ok) > 2 &&
+          stats::sd(x[[i]][ok]) > 0 && stats::sd(x[[j]][ok]) > 0) {
+        p_mat[i, j] <- suppressWarnings(
+          stats::cor.test(x[[i]][ok], x[[j]][ok], method = method)$p.value)
+      }
+    }
+  }
   if (verbose) message("Trade-off matrix computed (", method, " method).")
-  return(round(cor_mat, 3))
+  out <- round(cor_mat, 3)
+  attr(out, "p_values") <- signif(p_mat, 4)
+  attr(out, "n") <- n_mat
+  class(out) <- c("tradeoff_matrix", class(cor_mat))
+  return(out)
 }
 
 #' Nexus Radar Plot
@@ -149,7 +183,8 @@ nexus_tradeoff <- function(data, method = "pearson", verbose = TRUE) {
 #' @param labels Character vector. Names for nexus dimensions.
 #'   Default: Water, Energy, Food, Nutrient, Carbon.
 #' @param treatment_names Character vector. Labels for each treatment.
-#' @param colors Character vector. Colors for each treatment.
+#' @param colors Character vector. Colors for each treatment. Default is
+#'   a colour-blind-checked palette (up to 8 treatments).
 #' @param title Character. Plot title. Default "WEFNC Nexus Profile".
 #' @param fill Logical. If \code{TRUE}, fills the radar polygon area.
 #'   Default \code{TRUE}.
@@ -183,12 +218,9 @@ nexus_radar <- function(scores,
   if (is.null(treatment_names)) {
     treatment_names <- paste("T", seq_len(n_treat))
   }
-  if (is.null(colors)) {
-    colors <- c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
-                "#FF7F00", "#A65628", "#F781BF", "#999999")[seq_len(n_treat)]
-  }
-  angles <- seq(0, 2 * pi, length.out = n_dims + 1)[-(n_dims + 1)]
-  angles <- angles - pi / 2
+  if (is.null(colors)) colors <- .group_cols(n_treat)
+  # First dimension at the top, then clockwise
+  angles <- pi / 2 - seq(0, 2 * pi, length.out = n_dims + 1)[-(n_dims + 1)]
   old_par <- graphics::par(no.readonly = TRUE)
   on.exit(graphics::par(old_par))
   graphics::par(mar = c(2, 2, 3, 2))
@@ -199,15 +231,17 @@ nexus_radar <- function(scores,
   for (r in seq(0.2, 1.0, by = 0.2)) {
     theta <- seq(0, 2 * pi, length.out = 100)
     graphics::lines(r * cos(theta), r * sin(theta),
-                    col = "grey80", lty = 2)
-    graphics::text(0, r + 0.03, labels = r, cex = 0.6, col = "grey50")
+                    col = .wef_ink[["grid"]], lwd = 0.8)
+    graphics::text(0, r + 0.03, labels = r, cex = 0.6,
+                   col = .wef_ink[["muted"]])
   }
   for (i in seq_len(n_dims)) {
     graphics::lines(c(0, cos(angles[i])), c(0, sin(angles[i])),
-                    col = "grey60")
+                    col = .wef_ink[["grid"]], lwd = 0.8)
     lx <- 1.2 * cos(angles[i])
     ly <- 1.2 * sin(angles[i])
-    graphics::text(lx, ly, labels[i], cex = 0.9, font = 2)
+    graphics::text(lx, ly, labels[i], cex = 0.9, font = 2,
+                   col = .wef_ink[["secondary"]])
   }
   for (j in seq_len(n_treat)) {
     vals <- scores[j, ]
@@ -239,7 +273,8 @@ nexus_radar <- function(scores,
 #' @param col_labels Character vector. Dimension names.
 #' @param title Character. Plot title. Default "WEFNC Nexus Heatmap".
 #' @param color_palette Character vector of colors for gradient.
-#'   Default is a red-yellow-green palette.
+#'   Default is a single-hue blue scale that stays readable with colour
+#'   vision deficiency (version 1.0.0 used red-yellow-green).
 #'
 #' @return Invisibly returns the input \code{scores} matrix. Called
 #'   primarily for the side effect of generating a heatmap plot.
@@ -263,9 +298,12 @@ nexus_heatmap <- function(scores, row_labels = NULL, col_labels = NULL,
   n_col <- ncol(scores)
   if (is.null(row_labels)) row_labels <- paste("T", seq_len(n_row))
   if (is.null(col_labels)) col_labels <- paste("D", seq_len(n_col))
+  if (length(row_labels) != n_row || length(col_labels) != n_col) {
+    stop("'row_labels' and 'col_labels' must match the rows and columns ",
+         "of 'scores'.", call. = FALSE)
+  }
   if (is.null(color_palette)) {
-    color_palette <- grDevices::colorRampPalette(
-      c("#D73027", "#FDAE61", "#FEE08B", "#A6D96A", "#1A9850"))(100)
+    color_palette <- grDevices::colorRampPalette(.wef_seq)(100)
   }
   old_par <- graphics::par(no.readonly = TRUE)
   on.exit(graphics::par(old_par))
@@ -276,13 +314,14 @@ nexus_heatmap <- function(scores, row_labels = NULL, col_labels = NULL,
   for (i in seq_len(n_row)) {
     for (j in seq_len(n_col)) {
       val <- scores[i, j]
-      col_idx <- max(1, min(100, round(val * 100)))
+      col_idx <- if (is.na(val)) NA else max(1, min(100, round(val * 100)))
       graphics::rect(j - 0.5, n_row - i + 0.5,
                      j + 0.5, n_row - i + 1.5,
                      col = color_palette[col_idx],
                      border = "white", lwd = 2)
-      graphics::text(j, n_row - i + 1, round(val, 2),
-                     cex = 0.9, font = 2)
+      graphics::text(j, n_row - i + 1, round(val, 2), cex = 0.9,
+                     col = if (!is.na(val) && val > 0.6) "white" else
+                       .wef_ink[["primary"]])
     }
   }
   graphics::axis(1, at = seq_len(n_col), labels = col_labels,
@@ -298,7 +337,9 @@ nexus_heatmap <- function(scores, row_labels = NULL, col_labels = NULL,
 #' user-defined thresholds.
 #'
 #'
-#' @details Formula: \deqn{NSS = \frac{1}{n} \sum_{i=1}^{n} S_i}{NSS = mean(S_i)} where S_i are normalized sub-dimension scores.
+#' @details Formula: \deqn{NSS = \sum_{i=1}^{5} w_i S_i}{NSS = sum(w_i * S_i)}
+#'   where \eqn{S_i} are the dimension scores and \eqn{w_i} the weights
+#'   (equal weights give the mean).
 #'
 #' @param water_score Numeric vector. Water dimension score (0 to 1).
 #' @param energy_score Numeric vector. Energy dimension score (0 to 1).
@@ -310,7 +351,8 @@ nexus_heatmap <- function(scores, row_labels = NULL, col_labels = NULL,
 #'   sustainability categories: c(low, medium, high). Default
 #'   c(0.4, 0.6, 0.8).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return A data frame with columns:
 #' \describe{
@@ -341,7 +383,7 @@ nexus_sustainability_score <- function(water_score, energy_score,
                                        carbon_score,
                                        weights = rep(0.2, 5),
                                        thresholds = c(0.4, 0.6, 0.8),
-                                       verbose = TRUE) {
+                                       verbose = getOption("wefnexus.verbose", TRUE)) {
   ni <- nexus_index(water_score, energy_score, food_score,
                     nutrient_score, carbon_score, weights,
                     verbose = FALSE)
@@ -370,18 +412,47 @@ nexus_sustainability_score <- function(water_score, energy_score,
 #' @param water_consumed Numeric vector. Total water consumed (mm).
 #' @param energy_input Numeric vector. Total energy input (MJ/ha).
 #' @param energy_output Numeric vector. Total energy output (MJ/ha).
-#' @param n_applied Numeric vector. Nitrogen applied (kg/ha).
-#' @param n_uptake Numeric vector. Nitrogen total uptake (kg/ha).
+#' @param n_applied Numeric vector. Nitrogen applied (kg/ha). Needed when
+#'   \code{nutrient_metric = "pfp"}. May be \code{NULL} when
+#'   \code{nutrient_metric = "iue"}.
+#' @param n_uptake Numeric vector. Total plant nitrogen uptake (kg/ha).
+#'   Needed when \code{nutrient_metric = "iue"}; when supplied, internal
+#'   utilization efficiency is also reported.
 #' @param carbon_emission Numeric vector. Total GHG emission
 #'   (kg CO2-eq/ha).
 #' @param treatment_names Character vector. Treatment labels.
 #'   Default \code{NULL}.
-#' @param weights Numeric vector of length 5. Dimension weights.
-#'   Default equal weights.
+#' @param weights Numeric vector of length 5 (Water, Energy, Food,
+#'   Nutrient, Carbon) summing to 1, or one of \code{"equal"},
+#'   \code{"entropy"}, \code{"critic"} or \code{"pca"} to derive
+#'   weights with \code{\link{nexus_weights}}. Default equal weights.
+#' @param nutrient_metric Character. Indicator for the nutrient dimension:
+#'   \code{"pfp"} (partial factor productivity of applied N, default) or
+#'   \code{"iue"} (internal utilization efficiency, yield per kg N
+#'   uptake). Use \code{"iue"} for legumes grown without fertilizer N,
+#'   where PFP cannot be computed.
+#' @param carbon_basis Character. Indicator for the carbon dimension:
+#'   \code{"emission"} (total emission per ha, default, as in version
+#'   1.0.0) or \code{"intensity"} (emission per kg yield). Intensity
+#'   avoids penalising high-yielding treatments for larger absolute
+#'   emissions.
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
-#' @return A data frame with one row per treatment and columns:
+#' @details Each dimension indicator is min-max normalized across the
+#'   treatments supplied (carbon is inverted, so lower emission scores
+#'   higher). Scores are therefore relative to the set of treatments
+#'   being compared; with only two treatments every score is 0 or 1.
+#'   Min-max scaling stretches any spread to the full 0 to 1 range, so a
+#'   small absolute difference (for example 2 percent in IUE) can look as
+#'   large as a big one; check the raw indicators before interpreting.
+#'   When every treatment receives the same N, PFP is proportional to
+#'   yield, so the function warns and \code{nutrient_metric = "iue"} is
+#'   the better choice.
+#'
+#' @return A data frame of class \code{nexus_result} with one row per
+#'   treatment and columns:
 #' \describe{
 #'   \item{treatment}{Character. Treatment name}
 #'   \item{yield_kg_ha}{Numeric. Crop yield}
@@ -389,7 +460,8 @@ nexus_sustainability_score <- function(water_score, energy_score,
 #'   \item{EUE_ratio}{Numeric. Energy use efficiency ratio}
 #'   \item{EROI}{Numeric. Energy return on investment}
 #'   \item{net_energy_MJ}{Numeric. Net energy balance}
-#'   \item{PFP_kg_kgN}{Numeric. Partial factor productivity of N}
+#'   \item{PFP_kg_kgN}{Numeric. Partial factor productivity of N
+#'     (\code{NA} when N applied is missing or zero)}
 #'   \item{carbon_eff}{Numeric. Carbon efficiency}
 #'   \item{carbon_intensity}{Numeric. Carbon intensity}
 #'   \item{W_score}{Numeric. Normalized water score}
@@ -398,7 +470,11 @@ nexus_sustainability_score <- function(water_score, energy_score,
 #'   \item{N_score}{Numeric. Normalized nutrient score}
 #'   \item{C_score}{Numeric. Normalized carbon score}
 #'   \item{nexus_index}{Numeric. Composite nexus index}
+#'   \item{IUE_kg_kgN}{Numeric. Internal utilization efficiency of N
+#'     (\code{NA} when \code{n_uptake} is not supplied)}
+#'   \item{rank}{Integer. Rank by nexus index (1 = best)}
 #' }
+#' The weights used are stored in \code{attr(result, "weights")}.
 #'
 #' @examples
 #' \donttest{
@@ -407,34 +483,94 @@ nexus_sustainability_score <- function(water_score, energy_score,
 #'   water_consumed = c(450, 400, 350),
 #'   energy_input = c(12000, 11000, 9500),
 #'   energy_output = c(135000, 125000, 112000),
-#'   n_applied = c(120, 120, 120),
+#'   n_applied = c(150, 120, 90),
 #'   n_uptake = c(100, 90, 80),
 #'   carbon_emission = c(2500, 2200, 1800),
 #'   treatment_names = c("CA+Drip", "CT+Sprinkler", "ZT+Rainfed")
 #' )
 #'
+#' # Legume without fertilizer N, carbon scored per kg grain
+#' nexus_summary(
+#'   yield = c(950, 870, 780),
+#'   water_consumed = c(260, 240, 220),
+#'   energy_input = c(5200, 4800, 4100),
+#'   energy_output = c(36000, 33000, 29500),
+#'   n_applied = c(0, 0, 0),
+#'   n_uptake = c(62, 57, 50),
+#'   carbon_emission = c(610, 560, 470),
+#'   nutrient_metric = "iue", carbon_basis = "intensity"
+#' )
 #' }
 #' @export
 nexus_summary <- function(yield, water_consumed, energy_input,
-                          energy_output, n_applied, n_uptake,
+                          energy_output, n_applied = NULL, n_uptake = NULL,
                           carbon_emission, treatment_names = NULL,
-                          weights = rep(0.2, 5), verbose = TRUE) {
+                          weights = rep(0.2, 5),
+                          nutrient_metric = c("pfp", "iue"),
+                          carbon_basis = c("emission", "intensity"),
+                          verbose = getOption("wefnexus.verbose", TRUE)) {
+  nutrient_metric <- match.arg(nutrient_metric)
+  carbon_basis <- match.arg(carbon_basis)
+  .validate_positive(yield, "yield")
   n <- length(yield)
   if (is.null(treatment_names)) {
     treatment_names <- paste("Treatment", seq_len(n))
+  }
+  if (length(treatment_names) != n) {
+    stop("'treatment_names' must have the same length as 'yield'.",
+         call. = FALSE)
   }
   wue <- water_use_efficiency(yield, water_consumed, verbose = FALSE)
   eue <- energy_use_efficiency(energy_output, energy_input, verbose = FALSE)
   eroi_val <- eroi(energy_output, energy_input, verbose = FALSE)
   ne <- net_energy(energy_output, energy_input, verbose = FALSE)
-  pfp <- partial_factor_productivity(yield, n_applied, verbose = FALSE)
+
+  pfp <- rep(NA_real_, n)
+  if (!is.null(n_applied)) {
+    .validate_non_negative(n_applied, "n_applied")
+    n_applied <- rep_len(n_applied, n)
+    ok <- !is.na(n_applied) & n_applied > 0
+    pfp[ok] <- round(yield[ok] / n_applied[ok], 2)
+  }
+  iue <- rep(NA_real_, n)
+  if (!is.null(n_uptake)) {
+    iue <- internal_utilization_efficiency(yield, n_uptake, verbose = FALSE)
+  }
+  if (nutrient_metric == "pfp") {
+    if (anyNA(pfp)) {
+      stop("PFP needs 'n_applied' > 0 for every treatment. For legumes ",
+           "without fertilizer N, use nutrient_metric = \"iue\" with ",
+           "'n_uptake'.", call. = FALSE)
+    }
+    nut <- pfp
+    if (n >= 2 && length(unique(n_applied)) == 1) {
+      warning("N applied is the same for every treatment, so PFP is ",
+              "proportional to yield and the nutrient score repeats the ",
+              "food score (yield then carries double weight). Consider ",
+              "nutrient_metric = \"iue\".", call. = FALSE)
+    }
+  } else {
+    if (is.null(n_uptake)) {
+      stop("nutrient_metric = \"iue\" requires 'n_uptake'.", call. = FALSE)
+    }
+    nut <- iue
+  }
+
   ce <- carbon_efficiency(yield, carbon_emission, verbose = FALSE)
   ci <- round(carbon_emission / yield, 4)
   w_norm <- normalize_minmax(wue)
   e_norm <- normalize_minmax(eue)
   f_norm <- normalize_minmax(yield)
-  n_norm <- normalize_minmax(pfp)
-  c_norm <- normalize_minmax(carbon_emission, inverse = TRUE)
+  n_norm <- normalize_minmax(nut)
+  c_norm <- normalize_minmax(if (carbon_basis == "emission")
+    carbon_emission else ci, inverse = TRUE)
+
+  if (is.character(weights)) {
+    weights <- nexus_weights(
+      data.frame(Water = w_norm, Energy = e_norm, Food = f_norm,
+                 Nutrient = n_norm, Carbon = c_norm),
+      method = weights, verbose = FALSE)
+  }
   ni <- nexus_index(w_norm, e_norm, f_norm, n_norm, c_norm,
                     weights, verbose = FALSE)
   result <- data.frame(
@@ -444,9 +580,43 @@ nexus_summary <- function(yield, water_consumed, energy_input,
     carbon_eff = ce, carbon_intensity = ci,
     W_score = w_norm, E_score = e_norm, F_score = f_norm,
     N_score = n_norm, C_score = c_norm, nexus_index = ni,
+    IUE_kg_kgN = iue,
+    rank = as.integer(rank(-ni, ties.method = "min")),
     stringsAsFactors = FALSE
   )
+  attr(result, "weights") <- stats::setNames(
+    as.numeric(weights), c("Water", "Energy", "Food", "Nutrient", "Carbon"))
   if (verbose) message("Nexus summary computed for ", n, " treatments.")
   class(result) <- c("nexus_result", "data.frame")
   return(result)
+}
+
+#' Print method for tradeoff_matrix
+#'
+#' @param x An object of class \code{tradeoff_matrix} from
+#'   \code{\link{nexus_tradeoff}}.
+#' @param ... Additional arguments passed to \code{print}.
+#'
+#' @return Invisibly returns \code{x}. Called for the side effect of
+#'   printing the correlation matrix.
+#'
+#' @export
+print.tradeoff_matrix <- function(x, ...) {
+  m <- matrix(as.numeric(x), nrow(x), ncol(x), dimnames = dimnames(x))
+  print(m, ...)
+  cat("p-values: attr(x, \"p_values\"); draw with plot(x) or plot_tradeoff(x)\n")
+  invisible(x)
+}
+
+#' Plot method for tradeoff_matrix
+#'
+#' @param x An object of class \code{tradeoff_matrix}.
+#' @param ... Passed to \code{\link{plot_tradeoff}}, for example
+#'   \code{benefit}.
+#'
+#' @return A ggplot2 object.
+#'
+#' @export
+plot.tradeoff_matrix <- function(x, ...) {
+  plot_tradeoff(x, ...)
 }

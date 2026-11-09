@@ -4,7 +4,11 @@
 \alias{human_energy_profitability}
 \title{Human Energy Profitability}
 \usage{
-human_energy_profitability(energy_out, human_energy, verbose = TRUE)
+human_energy_profitability(
+  energy_out,
+  human_energy,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{energy_out}{Numeric vector. Total energy output (MJ/ha).}
@@ -12,7 +16,8 @@ human_energy_profitability(energy_out, human_energy, verbose = TRUE)
 \item{human_energy}{Numeric vector. Human labour energy input (MJ/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Human energy profitability (dimensionless ratio).

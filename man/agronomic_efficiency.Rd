@@ -8,7 +8,7 @@ agronomic_efficiency(
   yield_treated,
   yield_control,
   nutrient_applied,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -20,7 +20,8 @@ control plot (kg/ha).}
 \item{nutrient_applied}{Numeric vector. Amount of nutrient applied (kg/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Agronomic efficiency (kg grain per kg nutrient).

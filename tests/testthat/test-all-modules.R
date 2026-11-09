@@ -178,10 +178,12 @@ test_that("carbon_footprint: returns list with correct structure", {
   expect_true(cf$cf_intensity > 0)
 })
 
-test_that("soil_carbon_stock: SOC% * BD * D * (1-CF) * 0.1", {
+test_that("soil_carbon_stock: SOC% * BD * D * (1-CF) in Mg C/ha", {
   soc <- soil_carbon_stock(0.65, 1.45, 30, verbose = FALSE)
-  expected <- round(0.65 * 1.45 * 30 * 0.1, 2)
-  expect_equal(soc, expected)
+  # 1 ha x 0.30 m x 1450 kg/m3 = 4,350,000 kg soil; 0.65% C = 28,275 kg
+  expect_equal(soc, round(0.65 * 1.45 * 30, 2))
+  expect_equal(soil_carbon_stock(1, 1.5, 20, coarse_fraction = 0.1,
+                                 verbose = FALSE), 27)
 })
 
 test_that("global_warming_potential: AR6 values", {
@@ -190,10 +192,10 @@ test_that("global_warming_potential: AR6 values", {
                                      verbose = FALSE)
   expect_equal(gwp100, 100 + 10 * 27 + 1 * 273)
 
-  # 20yr: CH4=81, N2O=273
+  # 20yr: CH4=79.7 (non-fossil), N2O=273
   gwp20 <- global_warming_potential(co2 = 100, ch4 = 10, n2o = 1,
                                     time_horizon = "20yr", verbose = FALSE)
-  expect_equal(gwp20, 100 + 10 * 81 + 1 * 273)
+  expect_equal(gwp20, 100 + 10 * 79.7 + 1 * 273)  # AR6 GWP-20, non-fossil CH4
   expect_true(gwp20 > gwp100)
 })
 
@@ -242,7 +244,7 @@ test_that("nexus_summary: returns correct structure", {
   ns <- nexus_summary(
     yield = c(4500, 3800), water_consumed = c(450, 350),
     energy_input = c(12000, 9500), energy_output = c(135000, 112000),
-    n_applied = c(120, 120), n_uptake = c(100, 80),
+    n_applied = c(120, 100), n_uptake = c(100, 80),
     carbon_emission = c(2500, 1800), verbose = FALSE
   )
   expect_s3_class(ns, "data.frame")

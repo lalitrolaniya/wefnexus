@@ -4,7 +4,11 @@
 \alias{crop_water_productivity}
 \title{Crop Water Productivity (CWP)}
 \usage{
-crop_water_productivity(yield, et, verbose = TRUE)
+crop_water_productivity(
+  yield,
+  et,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{yield}{Numeric vector. Crop yield (kg/ha).}
@@ -12,7 +16,8 @@ crop_water_productivity(yield, et, verbose = TRUE)
 \item{et}{Numeric vector. Seasonal evapotranspiration (mm).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Crop water productivity (kg/m3).

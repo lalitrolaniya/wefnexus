@@ -4,7 +4,11 @@
 \alias{nexus_tradeoff}
 \title{Nexus Trade-off Matrix}
 \usage{
-nexus_tradeoff(data, method = "pearson", verbose = TRUE)
+nexus_tradeoff(
+  data,
+  method = "pearson",
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{data}{A data frame with numeric columns for each nexus
@@ -14,12 +18,19 @@ dimension (e.g., WUE, EUE, yield, NUE, carbon efficiency).}
 (default), \code{"spearman"}, or \code{"kendall"}.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 A numeric correlation matrix with pairwise correlations.
-  Positive values suggest synergies; negative values suggest
-  trade-offs between dimensions.
+  When all indicators are higher-is-better, positive values suggest
+  synergies and negative values trade-offs; for a lower-is-better
+  indicator (such as carbon footprint) the reading reverses. The p-values of the pairwise
+  correlation tests (\code{\link[stats]{cor.test}}) and the number of
+  complete pairs are attached as \code{attr(, "p_values")} and
+  \code{attr(, "n")}. The result has class \code{tradeoff_matrix} and
+  behaves as an ordinary matrix; \code{plot()} or
+  \code{\link{plot_tradeoff}} draws it.
 }
 \description{
 Computes pairwise correlation matrix among nexus dimensions to

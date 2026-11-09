@@ -4,7 +4,11 @@
 \alias{depleted_fraction}
 \title{Depleted Fraction (DF)}
 \usage{
-depleted_fraction(crop_et, total_inflow, verbose = TRUE)
+depleted_fraction(
+  crop_et,
+  total_inflow,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{crop_et}{Numeric vector. Beneficial crop evapotranspiration (mm).}
@@ -13,7 +17,8 @@ depleted_fraction(crop_et, total_inflow, verbose = TRUE)
 effective rainfall (mm).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Depleted fraction (proportion, 0 to 1).

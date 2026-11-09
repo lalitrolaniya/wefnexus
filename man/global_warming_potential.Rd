@@ -11,7 +11,7 @@ global_warming_potential(
   gwp_ch4 = 27,
   gwp_n2o = 273,
   time_horizon = "100yr",
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -29,7 +29,8 @@ global_warming_potential(
 \code{"20yr"} for different assessment periods.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric. Total global warming potential (kg CO2-eq/ha).
@@ -44,10 +45,14 @@ Formula: \deqn{GWP = CO_2 + CH_4 \times 27 + N_2O \times 273}
 IPCC AR6 100-year GWP values (with climate-carbon feedbacks):
 CH4 = 27, N2O = 273.
 
-IPCC AR6 20-year GWP values: CH4 = 81, N2O = 273.
+IPCC AR6 20-year GWP values for non-fossil (biogenic) methane, as
+emitted by agriculture: CH4 = 79.7, N2O = 273. With
+\code{time_horizon = "20yr"} these replace the defaults, unless you
+supply \code{gwp_ch4} or \code{gwp_n2o} yourself. Versions before
+1.1.0 used 81 for CH4.
 
-Note: Previous IPCC AR5 values were CH4 = 34, N2O = 298 (without
-climate-carbon feedbacks) or CH4 = 28, N2O = 265 (without).
+Note: Previous IPCC AR5 100-year values were CH4 = 34, N2O = 298
+(with climate-carbon feedbacks) or CH4 = 28, N2O = 265 (without).
 }
 \examples{
 global_warming_potential(co2 = 500, ch4 = 50, n2o = 2)

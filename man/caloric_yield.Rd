@@ -4,7 +4,11 @@
 \alias{caloric_yield}
 \title{Caloric Yield}
 \usage{
-caloric_yield(yield, caloric_value, verbose = TRUE)
+caloric_yield(
+  yield,
+  caloric_value,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{yield}{Numeric vector. Crop yield (kg/ha).}
@@ -12,7 +16,8 @@ caloric_yield(yield, caloric_value, verbose = TRUE)
 \item{caloric_value}{Numeric vector. Caloric content (kcal/kg).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Caloric yield (kcal/ha).

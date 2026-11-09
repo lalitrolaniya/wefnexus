@@ -11,7 +11,7 @@ nutrient_balance(
   n_output,
   p_output,
   k_output,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -28,7 +28,8 @@ nutrient_balance(
 \item{k_output}{Numeric. Total K removal or uptake (kg/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 A data frame with five columns:
@@ -38,7 +39,8 @@ A data frame with five columns:
   \item{output_kg_ha}{Numeric. Total nutrient output (kg/ha)}
   \item{balance_kg_ha}{Numeric. Balance: input minus output (kg/ha).
     Positive = surplus; negative = depletion}
-  \item{output_input_ratio}{Numeric. Output to input ratio}
+  \item{output_input_ratio}{Numeric. Output to input ratio
+    (\code{NA} when the input is zero)}
 }
 }
 \description{
@@ -46,9 +48,15 @@ Input-output nutrient balance for major nutrients (N, P, K).
 }
 \details{
 Formula: \deqn{NB = Nutrient Applied - Nutrient Removed}{NB = Nutrient Applied - Nutrient Removed (kg/ha)}
+
+Zero inputs are allowed (for example no K applied), giving
+  a negative balance that shows nutrient mining.
 }
 \examples{
 nutrient_balance(n_input = 120, p_input = 60, k_input = 40,
                  n_output = 95, p_output = 25, k_output = 80)
+# No potassium applied: balance shows K mining
+nutrient_balance(n_input = 20, p_input = 40, k_input = 0,
+                 n_output = 56.8, p_output = 8.2, k_output = 45)
 
 }

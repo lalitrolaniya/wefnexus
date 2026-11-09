@@ -12,7 +12,13 @@ ghg_emission(
   tillage = "conventional",
   gwp_n2o = 273,
   gwp_ch4 = 27,
-  verbose = TRUE
+  ef_n2o = 0.01,
+  ef_ch4_paddy = 1.3,
+  combustion_factor = 0.8,
+  ef_ch4_burn = 2.7,
+  ef_n2o_burn = 0.07,
+  include_burn_co2 = FALSE,
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -21,8 +27,8 @@ ghg_emission(
 \item{residue_burned}{Logical. Whether crop residues are burned.
 Default \code{FALSE}.}
 
-\item{residue_amount}{Numeric. Residue amount (kg/ha) if burned.
-Default 0.}
+\item{residue_amount}{Numeric. Residue amount (kg dry matter/ha) if
+burned. Default 0.}
 
 \item{paddy_days}{Numeric. Days under flooded paddy conditions.
 Default 0.}
@@ -34,17 +40,37 @@ Default 0.}
 
 \item{gwp_ch4}{Numeric. GWP for CH4. Default 27 (IPCC AR6).}
 
+\item{ef_n2o}{Numeric. Direct N2O emission factor (kg N2O-N per kg N
+applied). Default 0.01, the IPCC aggregated Tier 1 value. The 2019
+IPCC Refinement gives 0.005 for dry climates (relevant to arid
+zones) and 0.016 for synthetic N in wet climates.}
+
+\item{ef_ch4_paddy}{Numeric. Baseline CH4 emission factor for
+continuously flooded rice (kg CH4/ha/day). Default 1.3 (IPCC 2006);
+the 2019 Refinement gives 1.19.}
+
+\item{combustion_factor}{Numeric. Fraction of residue actually burnt.
+Default 0.8 (IPCC 2006 Table 2.6 for maize and rice residues; 0.9
+for wheat).}
+
+\item{ef_ch4_burn, ef_n2o_burn}{Numeric. Emission factors for burning
+agricultural residues (g per kg dry matter burnt). Defaults 2.7 and
+0.07 (IPCC 2006 Table 2.5).}
+
+\item{include_burn_co2}{Logical. Add biogenic CO2 from residue burning
+to the total. Default \code{FALSE}.}
+
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
-A data frame with four columns:
-\describe{
-  \item{source}{Character. Emission source description}
-  \item{gas}{Character. Greenhouse gas type}
-  \item{emission_kg}{Numeric. Raw emission (kg/ha)}
-  \item{CO2_eq_kg}{Numeric. Emission in CO2 equivalents (kg CO2-eq/ha)}
-}
+For a single observation, a data frame with columns
+  \code{source}, \code{gas}, \code{emission_kg}, \code{CO2_eq_kg} and
+  \code{counted} (whether the row enters the total); the total is
+  stored in \code{attr(, "total_CO2eq")}. For several observations
+  (any input of length > 1), a data frame with one row per observation
+  and a \code{total_CO2eq} column.
 }
 \description{
 Quick estimation of greenhouse gas emissions (N2O, CH4, CO2) from
@@ -52,13 +78,31 @@ agricultural field operations using IPCC Tier 1 default factors.
 }
 \details{
 Formula: \deqn{GHG = \sum (Activity_i \times EF_i)}{GHG = sum(Activity_i * EF_i)} where EF is the emission factor for each activity.
+
+Residue burning follows IPCC (2006, Vol. 4, Ch. 2): mass burnt =
+residue x combustion factor; CH4 and N2O = mass burnt x emission factor
+(g/kg dry matter). CO2 from burning crop residue is biogenic and, as in
+IPCC inventories, is reported but left out of the total unless
+\code{include_burn_co2 = TRUE}. Versions before 1.1.0 added that CO2 to
+the total and omitted burning CH4 and N2O.
+
+The tillage CO2 values (150, 100 and 50 kg CO2/ha for conventional,
+reduced and zero tillage) are rough screening values. When diesel use
+is known, \code{\link{carbon_footprint}} gives a better estimate.
 }
 \examples{
 ghg_emission(n_applied = 120, tillage = "zero")
 ghg_emission(n_applied = 150, paddy_days = 90)
+ghg_emission(n_applied = 100, residue_burned = TRUE,
+             residue_amount = 5000)
+ghg_emission(n_applied = c(20, 40, 60), ef_n2o = 0.005)
 
 }
 \references{
+IPCC (2006). \emph{2006 IPCC Guidelines for National Greenhouse Gas
+Inventories}. Volume 4, Chapter 2: Generic methodologies applicable to
+multiple land-use categories (Tables 2.5 and 2.6). IGES, Japan.
+
 IPCC (2019). \emph{2019 Refinement to the 2006 IPCC Guidelines for
 National Greenhouse Gas Inventories}. Volume 4, Chapter 11:
 N2O emissions from managed soils, and CO2 emissions from lime

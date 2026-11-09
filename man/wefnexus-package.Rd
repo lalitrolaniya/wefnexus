@@ -31,12 +31,25 @@ five core modules and a nexus integration layer:
     greenhouse gas (GHG) emission estimation, soil organic carbon (SOC)
     stocks, carbon sequestration rate (CSR), and global warming potential
     (GWP) using IPCC AR6 values.}
+  \item{\strong{Nexus}}{Normalization, composite nexus index, objective
+    weights (\code{\link{nexus_weights}}: entropy, CRITIC, PCA), TOPSIS
+    ranking (\code{\link{nexus_topsis}}), trade-off matrix, weight
+    sensitivity, radar and heatmap plots.}
+  \item{\strong{Workflow}}{\code{\link{nexus_analysis}} runs the full
+    analysis on replicated field data; \code{\link{nexus_anova}} gives
+    treatment means with SEm, CD, CV and letter groups;
+    \code{\link{energy_budget}} converts physical input quantities to
+    energy with \code{\link{energy_coefficients}}.}
 }
+
+Set \code{options(wefnexus.verbose = FALSE)} to silence the
+informational messages of all functions.
 }
 \seealso{
 Useful links:
 \itemize{
   \item \url{https://github.com/lalitrolaniya/wefnexus}
+  \item \url{https://lalitrolaniya.github.io/wefnexus/}
   \item Report bugs at \url{https://github.com/lalitrolaniya/wefnexus/issues}
 }
 
@@ -46,9 +59,10 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Hemant Poonia \email{pooniaheman80@gmail.com} (\href{https://orcid.org/0000-0002-0945-8793}{ORCID})
+  \item Lalit Kumar Rolaniya \email{lalitrolaniya@gmail.com} (\href{https://orcid.org/0000-0001-8908-1211}{ORCID})
+  \item Hemant Poonia \email{pooniaheman80@gmail.com} (\href{https://orcid.org/0000-0002-0945-8793}{ORCID}) (deceased)
   \item Ram Lal Jat \email{khokharagro1986@gmail.com} (\href{https://orcid.org/0009-0003-4339-0555}{ORCID})
-  \item Monika Punia \email{monikapunia02@gmail.com} (\href{https://orcid.org/0009-0002-0294-6767}{ORCID})
+  \item Monika Punia \email{monikapunia02@gmail.com} (\href{https://orcid.org/0009-0002-0294-6767}{ORCID}) (deceased)
   \item Raja Ram Choudhary \email{rajaramchoudhary26@gmail.com}
 }
 

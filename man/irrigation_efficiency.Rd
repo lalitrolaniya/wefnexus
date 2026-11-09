@@ -9,7 +9,7 @@ irrigation_efficiency(
   water_diverted,
   water_stored = NULL,
   crop_et = NULL,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -24,7 +24,8 @@ If \code{NULL}, application and overall efficiency are not computed.}
 If \code{NULL}, consumptive use efficiency is not computed.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 A data frame with efficiency metrics expressed as percentages.

@@ -24,7 +24,8 @@ Default: Water, Energy, Food, Nutrient, Carbon.}
 
 \item{treatment_names}{Character vector. Labels for each treatment.}
 
-\item{colors}{Character vector. Colors for each treatment.}
+\item{colors}{Character vector. Colors for each treatment. Default is
+a colour-blind-checked palette (up to 8 treatments).}
 
 \item{title}{Character. Plot title. Default "WEFNC Nexus Profile".}
 

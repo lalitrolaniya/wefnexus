@@ -16,7 +16,7 @@ carbon_footprint(
   ch4_emission = 0,
   yield = NULL,
   ef_diesel = 2.68,
-  ef_electricity = 0.82,
+  ef_electricity = 0.727,
   ef_n_manufacture = 4.96,
   ef_p_manufacture = 1.61,
   ef_k_manufacture = 0.57,
@@ -24,7 +24,8 @@ carbon_footprint(
   ef_seed = 0.58,
   gwp_n2o = 273,
   gwp_ch4 = 27,
-  verbose = TRUE
+  ef_n2o = 0.01,
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -48,9 +49,8 @@ Default 0.}
 \item{seed_rate}{Numeric. Seed rate (kg/ha). Default 0.}
 
 \item{n2o_direct}{Numeric. Direct N2O emissions from soil
-(kg N2O/ha). If \code{NULL} (default), estimated using IPCC
-Tier 1 default: 1 percent of applied N emitted as N2O-N, then
-converted to N2O using factor 44/28.}
+(kg N2O/ha). If \code{NULL} (default), estimated as
+\code{n_fertilizer * ef_n2o * 44/28} (IPCC Tier 1).}
 
 \item{ch4_emission}{Numeric. Methane emission (kg CH4/ha). Default 0.
 Relevant for rice paddies.}
@@ -62,7 +62,11 @@ Default \code{NULL}.}
 Default 2.68.}
 
 \item{ef_electricity}{Numeric. Emission factor for grid electricity
-(kg CO2/kWh). Default 0.82 (India grid average, CEA 2023).}
+(kg CO2/kWh). Default 0.727, the weighted average for the Indian
+grid in 2023-24 (Central Electricity Authority, CO2 Baseline
+Database version 20.0). Versions before 1.1.0 used 0.82; set
+\code{ef_electricity = 0.82} to reproduce earlier results. Use
+your own country or year value where appropriate.}
 
 \item{ef_n_manufacture}{Numeric. Emission factor for N fertilizer
 manufacture (kg CO2-eq/kg N). Default 4.96 (urea-based).}
@@ -85,8 +89,14 @@ to CO2. Default 273 (IPCC AR6, 100-year horizon).}
 \item{gwp_ch4}{Numeric. Global warming potential of CH4 relative
 to CO2. Default 27 (IPCC AR6, 100-year horizon).}
 
+\item{ef_n2o}{Numeric. Direct N2O emission factor (kg N2O-N per kg N
+applied). Default 0.01, the IPCC aggregated Tier 1 value. The 2019
+IPCC Refinement gives 0.005 for dry climates (relevant to arid
+zones) and 0.016 for synthetic N in wet climates.}
+
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 A list with components:
@@ -105,7 +115,11 @@ production, with source-wise breakdown and yield-scaled intensity.
 Uses IPCC AR6 default GWP values.
 }
 \details{
-Formula: \deqn{CF = \frac{\sum Activity_i \times EF_i}{Yield}}
+Formula: \deqn{CF = \sum_i A_i \times EF_i}{CF = sum(A_i * EF_i)}
+  in kg CO2-eq/ha, where \eqn{A_i} is the activity (input use) and
+  \eqn{EF_i} its emission factor; N2O and CH4 are converted with the
+  GWP values. When \code{yield} is given, the carbon intensity
+  \eqn{CF / Y} (kg CO2-eq/kg) is also returned.
 }
 \examples{
 cf <- carbon_footprint(
@@ -121,7 +135,11 @@ cf$breakdown
 \references{
 Lal, R. (2004). Carbon emission from farm operations.
 \emph{Environment International}, 30(7), 981-990.
-\doi{10.1016/j.envint.2004.01.005}
+\doi{10.1016/j.envint.2004.03.005}
+
+Central Electricity Authority (2024). \emph{CO2 Baseline Database for
+the Indian Power Sector}, Version 20.0. Ministry of Power, Government
+of India, New Delhi.
 
 Forster, P. et al. (2021). The Earth's energy budget, climate
 feedbacks, and climate sensitivity. In \emph{Climate Change 2021:

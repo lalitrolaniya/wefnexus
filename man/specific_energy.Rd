@@ -4,7 +4,11 @@
 \alias{specific_energy}
 \title{Specific Energy}
 \usage{
-specific_energy(energy_in, duration, verbose = TRUE)
+specific_energy(
+  energy_in,
+  duration,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{energy_in}{Numeric vector. Total energy input (MJ/ha).}
@@ -12,7 +16,8 @@ specific_energy(energy_in, duration, verbose = TRUE)
 \item{duration}{Numeric vector. Crop duration (days).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Specific energy (MJ/ha/day).
@@ -22,7 +27,13 @@ Energy input per unit area per unit time, useful for comparing
 cropping systems of different durations.
 }
 \details{
-Formula: \deqn{SE = \frac{Energy Input}{Area}}{SE = Energy Input / Area}
+Formula: \deqn{SE = \frac{E_{in}}{d}}{SE = E_in / d}
+  where \eqn{E_{in}} is energy input (MJ/ha) and \eqn{d} is crop
+  duration (days).
+
+  Note that much of the energy budgeting literature uses "specific
+  energy" for energy input per kg of produce (MJ/kg). That quantity is
+  returned by \code{\link{energy_intensity}}.
 }
 \examples{
 specific_energy(energy_in = 12000, duration = 150)

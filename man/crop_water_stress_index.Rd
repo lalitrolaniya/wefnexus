@@ -4,7 +4,11 @@
 \alias{crop_water_stress_index}
 \title{Crop Water Stress Index (CWSI)}
 \usage{
-crop_water_stress_index(actual_et, potential_et, verbose = TRUE)
+crop_water_stress_index(
+  actual_et,
+  potential_et,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{actual_et}{Numeric vector. Actual evapotranspiration (mm).}
@@ -13,7 +17,8 @@ crop_water_stress_index(actual_et, potential_et, verbose = TRUE)
 evapotranspiration (mm).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. CWSI values between 0 (no stress) and 1
@@ -21,8 +26,9 @@ Numeric vector. CWSI values between 0 (no stress) and 1
   values close to 1 indicate severe water deficit.
 }
 \description{
-Computes the Crop Water Stress Index based on the ratio of actual
-to potential evapotranspiration.
+Computes the Crop Water Stress Index from the ratio of actual to
+potential evapotranspiration (the evapotranspiration form of the
+index described by Jackson et al., 1981).
 }
 \details{
 \deqn{CWSI = 1 - \frac{ET_a}{ET_p}}{CWSI = 1 - (ETa / ETp)}
@@ -32,6 +38,11 @@ crop_water_stress_index(c(4.5, 3.8, 3.0, 2.2), c(5.0, 5.0, 5.0, 5.0))
 
 }
 \references{
+Jackson, R.D., Idso, S.B., Reginato, R.J. & Pinter, P.J. (1981).
+Canopy temperature as a crop water stress indicator.
+\emph{Water Resources Research}, 17(4), 1133-1138.
+\doi{10.1029/WR017i004p01133}
+
 Idso, S.B. et al. (1981). Normalizing the stress-degree-day parameter
 for environmental variability. \emph{Agricultural Meteorology}, 24, 45-55.
 \doi{10.1016/0002-1571(81)90032-7}

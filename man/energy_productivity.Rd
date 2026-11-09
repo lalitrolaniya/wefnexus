@@ -4,7 +4,11 @@
 \alias{energy_productivity}
 \title{Energy Productivity}
 \usage{
-energy_productivity(yield, energy_in, verbose = TRUE)
+energy_productivity(
+  yield,
+  energy_in,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{yield}{Numeric vector. Crop yield (kg/ha).}
@@ -12,7 +16,8 @@ energy_productivity(yield, energy_in, verbose = TRUE)
 \item{energy_in}{Numeric vector. Total energy input (MJ/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Energy productivity (kg/MJ). Higher values

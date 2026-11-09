@@ -8,7 +8,8 @@ nexus_heatmap_gg(
   scores,
   treatment_names = NULL,
   dim_labels = c("Water", "Energy", "Food", "Nutrient", "Carbon"),
-  title = "WEFNC Nexus Heatmap"
+  title = "WEFNC Nexus Heatmap",
+  colours = NULL
 )
 }
 \arguments{
@@ -21,6 +22,11 @@ as columns).}
 Default: Water, Energy, Food, Nutrient, Carbon.}
 
 \item{title}{Character. Plot title.}
+
+\item{colours}{Character vector of colours for the 0 to 1 gradient.
+Default is a single-hue blue scale that is readable with colour
+vision deficiency. The red-yellow-green scale of version 1.0.0 is
+\code{c("#D73027", "#FDAE61", "#FEE08B", "#A6D96A", "#1A9850")}.}
 }
 \value{
 A ggplot2 object.

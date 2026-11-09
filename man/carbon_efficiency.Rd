@@ -4,7 +4,11 @@
 \alias{carbon_efficiency}
 \title{Carbon Efficiency}
 \usage{
-carbon_efficiency(yield, carbon_emission, verbose = TRUE)
+carbon_efficiency(
+  yield,
+  carbon_emission,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{yield}{Numeric vector. Crop yield (kg/ha).}
@@ -13,7 +17,8 @@ carbon_efficiency(yield, carbon_emission, verbose = TRUE)
 (kg CO2-eq/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Carbon efficiency (kg yield per kg CO2-eq).

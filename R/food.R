@@ -9,7 +9,14 @@
 #' relative to potential, and optionally nutritional quality.
 #'
 #'
-#' @details Formula: \deqn{FPI = \frac{Yield}{Reference Yield} \times 100}{FPI = (Yield / Reference Yield) * 100}
+#' @details Without protein and caloric values,
+#'   \deqn{FPI = \min(Y / Y_{ref}, 1)}{FPI = min(Y / Y_ref, 1)}
+#'   With both supplied,
+#'   \deqn{FPI = 0.5 \min(Y / Y_{ref}, 1) + 0.25 \min(P / 40, 1) +
+#'   0.25 \min(C / 400, 1)}{FPI = 0.5 min(Y/Y_ref, 1) + 0.25 min(P/40, 1) + 0.25 min(C/400, 1)}
+#'   where P is protein (percent) and C is caloric value (kcal/100 g);
+#'   40 percent protein and 400 kcal/100 g are the upper reference
+#'   values. The index is on a 0 to 1 scale.
 #'
 #' @param yield Numeric vector. Crop yield (kg/ha).
 #' @param reference_yield Numeric. Reference or potential yield (kg/ha).
@@ -18,7 +25,8 @@
 #' @param caloric_value Numeric vector. Caloric value (kcal/100g).
 #'   Default \code{NULL}.
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Food productivity index on a 0 to 1 scale.
 #'   When protein and caloric values are provided, weights are 0.50 for
@@ -32,7 +40,7 @@
 food_productivity_index <- function(yield, reference_yield,
                                     protein_content = NULL,
                                     caloric_value = NULL,
-                                    verbose = TRUE) {
+                                    verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield, "yield")
   .validate_positive(reference_yield, "reference_yield")
   yield_ratio <- pmin(yield / reference_yield, 1)
@@ -52,12 +60,14 @@ food_productivity_index <- function(yield, reference_yield,
 #' Relative yield performance compared to a check or control treatment.
 #'
 #'
-#' @details Formula: \deqn{CYI = \frac{Yield}{Maximum Yield} \times 100}{CYI = (Yield / Maximum Yield) * 100}
+#' @details Formula: \deqn{CYI = \frac{Y}{Y_{check}}}{CYI = Y / Y_check}
+#'   Multiply by 100 to express as a percentage of the check.
 #'
 #' @param yield Numeric vector. Treatment yields (kg/ha).
 #' @param check_yield Numeric. Control or check yield (kg/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Yield index where 1.0 equals the check yield.
 #'   Values above 1 indicate superiority over check.
@@ -66,7 +76,7 @@ food_productivity_index <- function(yield, reference_yield,
 #' crop_yield_index(yield = c(4500, 4200, 3800), check_yield = 4000)
 #'
 #' @export
-crop_yield_index <- function(yield, check_yield, verbose = TRUE) {
+crop_yield_index <- function(yield, check_yield, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield, "yield")
   .validate_positive(check_yield, "check_yield")
   result <- yield / check_yield
@@ -82,7 +92,8 @@ crop_yield_index <- function(yield, check_yield, verbose = TRUE) {
 #' @param biological_yield Numeric vector. Total above-ground biomass
 #'   yield (kg/ha), which is grain plus straw/stover.
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Harvest index as a proportion (0 to 1).
 #'   A warning is issued if any value exceeds 1.
@@ -100,7 +111,7 @@ crop_yield_index <- function(yield, check_yield, verbose = TRUE) {
 #'
 #' @export
 harvest_index <- function(economic_yield, biological_yield,
-                          verbose = TRUE) {
+                          verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(economic_yield, "economic_yield")
   .validate_positive(biological_yield, "biological_yield")
   .validate_same_length(economic_yield, biological_yield)
@@ -126,7 +137,8 @@ harvest_index <- function(economic_yield, biological_yield,
 #' @param yield_sole_b Numeric vector. Yield of crop B in sole crop
 #'   (kg/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. LER values. Values greater than 1 indicate
 #'   an intercropping advantage; less than 1 indicates a disadvantage.
@@ -146,7 +158,7 @@ harvest_index <- function(economic_yield, biological_yield,
 #' @export
 land_equivalent_ratio <- function(yield_inter_a, yield_sole_a,
                                    yield_inter_b, yield_sole_b,
-                                   verbose = TRUE) {
+                                   verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield_inter_a, "yield_inter_a")
   .validate_positive(yield_sole_a, "yield_sole_a")
   .validate_numeric(yield_inter_b, "yield_inter_b")
@@ -168,7 +180,8 @@ land_equivalent_ratio <- function(yield_inter_a, yield_sole_a,
 #' @param base_price Numeric. Price of the base or reference crop
 #'   (currency/kg).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric. System productivity expressed as base crop equivalent
 #'   yield (kg/ha).
@@ -182,7 +195,7 @@ land_equivalent_ratio <- function(yield_inter_a, yield_sole_a,
 #'
 #' @export
 system_productivity_index <- function(yields, prices, base_price,
-                                      verbose = TRUE) {
+                                      verbose = getOption("wefnexus.verbose", TRUE)) {
   if (length(yields) != length(prices)) {
     stop("'yields' and 'prices' must have the same length.", call. = FALSE)
   }
@@ -202,7 +215,8 @@ system_productivity_index <- function(yields, prices, base_price,
 #' @param yield Numeric vector. Crop yield (kg/ha).
 #' @param caloric_value Numeric vector. Caloric content (kcal/kg).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Caloric yield (kcal/ha).
 #'
@@ -210,7 +224,7 @@ system_productivity_index <- function(yields, prices, base_price,
 #' caloric_yield(yield = 4500, caloric_value = 3400)
 #'
 #' @export
-caloric_yield <- function(yield, caloric_value, verbose = TRUE) {
+caloric_yield <- function(yield, caloric_value, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield, "yield")
   .validate_numeric(caloric_value, "caloric_value")
   .validate_same_length(yield, caloric_value)
@@ -229,7 +243,8 @@ caloric_yield <- function(yield, caloric_value, verbose = TRUE) {
 #' @param yield Numeric vector. Crop yield (kg/ha).
 #' @param protein_content Numeric vector. Protein content (percent).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Protein yield (kg/ha).
 #'
@@ -237,7 +252,7 @@ caloric_yield <- function(yield, caloric_value, verbose = TRUE) {
 #' protein_yield(yield = 4500, protein_content = 12.5)
 #'
 #' @export
-protein_yield <- function(yield, protein_content, verbose = TRUE) {
+protein_yield <- function(yield, protein_content, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield, "yield")
   .validate_numeric(protein_content, "protein_content")
   .validate_same_length(yield, protein_content)
@@ -252,12 +267,15 @@ protein_yield <- function(yield, protein_content, verbose = TRUE) {
 #' efficiency of crop production.
 #'
 #'
-#' @details Formula: \deqn{PEI = \frac{Yield}{Total Input Cost} \times 100}{PEI = (Yield / Total Input Cost) * 100}
+#' @details Formula: \deqn{PEI = \frac{Y}{C}}{PEI = Y / C}
+#'   where Y is yield (kg/ha) and C is the total cost of production
+#'   (currency/ha).
 #'
 #' @param yield Numeric vector. Crop yield (kg/ha).
 #' @param cost Numeric vector. Total cost of production (currency/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Production efficiency index (kg/currency unit).
 #'
@@ -265,7 +283,7 @@ protein_yield <- function(yield, protein_content, verbose = TRUE) {
 #' production_efficiency_index(yield = 4500, cost = 28500)
 #'
 #' @export
-production_efficiency_index <- function(yield, cost, verbose = TRUE) {
+production_efficiency_index <- function(yield, cost, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield, "yield")
   .validate_positive(cost, "cost")
   .validate_same_length(yield, cost)

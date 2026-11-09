@@ -9,7 +9,7 @@ soil_carbon_stock(
   bulk_density,
   depth = 30,
   coarse_fraction = 0,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -23,7 +23,8 @@ soil_carbon_stock(
 fragments greater than 2 mm (0 to 1). Default 0.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. SOC stock (Mg C/ha, equivalent to t C/ha).
@@ -32,10 +33,15 @@ Numeric vector. SOC stock (Mg C/ha, equivalent to t C/ha).
 Estimates soil organic carbon stock for a given soil depth.
 }
 \details{
-\deqn{SOC = SOC_{pct} \times BD \times D \times (1 - CF) \times 0.1}{SOC = SOC_pct * BD * D * (1-CF) * 0.1}
-where BD is bulk density (Mg/m3), D is depth (cm), CF is coarse
-fraction, and 0.1 is the conversion factor from (percent * Mg/m3 *
-cm) to Mg/ha.
+\deqn{SOC = SOC_{pct} \times BD \times D \times (1 - CF)}{SOC = SOC_pct * BD * D * (1 - CF)}
+where SOC_pct is organic carbon (percent), BD is bulk density
+(Mg/m3), D is depth (cm) and CF is the coarse fragment fraction. The
+product of percent, Mg/m3 and cm is already Mg C/ha:
+(SOC/100) x BD x (D/100 m) x 10000 m2/ha.
+
+Versions before 1.1.0 multiplied by an extra factor of 0.1, which gave
+kg C/m2 while labelling the result Mg C/ha, so stocks were 10 times
+too low.
 }
 \examples{
 soil_carbon_stock(soc_pct = 0.65, bulk_density = 1.45, depth = 30)

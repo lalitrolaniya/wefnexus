@@ -45,3 +45,35 @@
 #' data(arid_pulse_nexus)
 #' str(arid_pulse_nexus)
 "arid_pulse_nexus"
+
+#' Replicated Arid Pulse Trial Dataset
+#'
+#' A plot-level dataset from a simulated randomized complete block design
+#' with the six conservation agriculture treatments of
+#' \code{\link{arid_pulse_nexus}} and three replications. Intended for
+#' examples of \code{\link{nexus_analysis}} and \code{\link{nexus_anova}}.
+#'
+#' @format A data frame with 18 rows and 11 variables:
+#' \describe{
+#'   \item{treatment}{Character. Treatment combination name}
+#'   \item{replication}{Character. Block (R1 to R3)}
+#'   \item{grain_yield}{Numeric. Grain yield (kg/ha)}
+#'   \item{straw_yield}{Numeric. Straw yield (kg/ha)}
+#'   \item{total_water}{Numeric. Total water consumed (mm)}
+#'   \item{energy_input}{Numeric. Total energy input (MJ/ha)}
+#'   \item{energy_output}{Numeric. Energy output of grain and straw
+#'     (MJ/ha), using 14.7 and 12.5 MJ/kg}
+#'   \item{n_applied}{Numeric. Nitrogen applied (kg/ha)}
+#'   \item{n_uptake}{Numeric. Total plant nitrogen uptake (kg/ha)}
+#'   \item{grain_n_uptake}{Numeric. Grain nitrogen uptake (kg/ha)}
+#'   \item{ghg_emission}{Numeric. Total GHG emission (kg CO2-eq/ha)}
+#' }
+#'
+#' @source Simulated around the treatment means of
+#'   \code{\link{arid_pulse_nexus}}; the script is in the package source
+#'   (\code{data-raw/make_data.R}).
+#'
+#' @examples
+#' data(arid_pulse_trial)
+#' aggregate(grain_yield ~ treatment, data = arid_pulse_trial, FUN = mean)
+"arid_pulse_trial"

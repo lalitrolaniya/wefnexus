@@ -9,7 +9,7 @@ land_equivalent_ratio(
   yield_sole_a,
   yield_inter_b,
   yield_sole_b,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -26,7 +26,8 @@ land_equivalent_ratio(
 (kg/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. LER values. Values greater than 1 indicate

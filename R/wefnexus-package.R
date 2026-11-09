@@ -26,7 +26,19 @@
 #'     greenhouse gas (GHG) emission estimation, soil organic carbon (SOC)
 #'     stocks, carbon sequestration rate (CSR), and global warming potential
 #'     (GWP) using IPCC AR6 values.}
+#'   \item{\strong{Nexus}}{Normalization, composite nexus index, objective
+#'     weights (\code{\link{nexus_weights}}: entropy, CRITIC, PCA), TOPSIS
+#'     ranking (\code{\link{nexus_topsis}}), trade-off matrix, weight
+#'     sensitivity, radar and heatmap plots.}
+#'   \item{\strong{Workflow}}{\code{\link{nexus_analysis}} runs the full
+#'     analysis on replicated field data; \code{\link{nexus_anova}} gives
+#'     treatment means with SEm, CD, CV and letter groups;
+#'     \code{\link{energy_budget}} converts physical input quantities to
+#'     energy with \code{\link{energy_coefficients}}.}
 #' }
+#'
+#' Set \code{options(wefnexus.verbose = FALSE)} to silence the
+#' informational messages of all functions.
 #'
 #' @docType package
 #' @name wefnexus-package

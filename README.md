@@ -4,7 +4,7 @@
 [![R-CMD-check](https://github.com/lalitrolaniya/wefnexus/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/lalitrolaniya/wefnexus/actions/workflows/R-CMD-check.yaml)
 [![CRAN status](https://www.r-pkg.org/badges/version/wefnexus)](https://CRAN.R-project.org/package=wefnexus)
 [![DOI](https://img.shields.io/badge/DOI-10.32614/CRAN.package.wefnexus-blue)](https://doi.org/10.32614/CRAN.package.wefnexus)
-[![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://cran.r-project.org/web/licenses/GPL-3)
 [![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/wefnexus)](https://CRAN.R-project.org/package=wefnexus)
 [![Monthly Downloads](https://cranlogs.r-pkg.org/badges/wefnexus)](https://CRAN.R-project.org/package=wefnexus)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
@@ -38,63 +38,133 @@ Or install the development version from GitHub:
 devtools::install_github("lalitrolaniya/wefnexus")
 ```
 
+## What's new in 1.1.0
+
+- **One call for a whole trial.** `nexus_analysis()` takes plot-level data
+  (treatment x replication) and returns indicators, an ANOVA table, the
+  composite nexus index and a TOPSIS ranking.
+- **Journal-ready ANOVA.** `nexus_anova()` gives means with letter groups,
+  SEm, CD (5%) and CV for CRD and RCBD trials.
+- **Objective weights.** `nexus_weights()` derives weights by entropy,
+  CRITIC or PCA instead of assuming equal weights.
+- **TOPSIS ranking.** `nexus_topsis()` ranks treatments on raw indicators.
+- **Energy budget from field records.** `energy_budget()` turns litres,
+  kilograms and labour hours into MJ/ha, with direct/indirect and
+  renewable/non-renewable shares, using an editable `energy_coefficients`
+  table.
+- **Robust rankings.** `nexus_rank_compare()` ranks treatments eight ways
+  and reports Kendall's W, so you can show a recommendation does not
+  hinge on one choice of weights.
+- **Publication-ready figures.** `plot()` works on every result: means
+  with error bars and letters, radar small multiples, TOPSIS rankings,
+  energy budgets, and a trade-off heatmap with significance stars, all in
+  a colour-blind-checked palette.
+- **Legume-friendly.** `nexus_summary(nutrient_metric = "iue")` works when
+  no fertilizer N is applied; `ef_n2o = 0.005` applies the IPCC dry-climate
+  N2O factor.
+- **Important fixes.** `soil_carbon_stock()` was 10 times too low, and
+  `nexus_heatmap_gg()` swapped row labels; also fixed NHI in
+  `nutrient_use_efficiency()`, `water_footprint(area)` and
+  `nexus_summary()`. See [NEWS](NEWS.md).
+
 ## Modules
 
-| Module | Functions | Key Metrics |
+| Module | Functions | Key metrics |
 |--------|-----------|-------------|
-| 💧 **Water** | 11 | WUE, WP, WF (green/blue/grey), CWSI, CWP, RUE, IWP, WSI |
-| ⚡ **Energy** | 14 | EUE, EROI (standard + extended), EP, EI, NER, REF, energy budget |
-| 🌾 **Food** | 12 | FPI, HI, LER, SPI, SYI, nutritional yield, BCR |
-| 🧪 **Nutrient** | 11 | AE, PE, RE, PFP, IUE, NHI, N surplus, SNI |
-| 🌿 **Carbon** | 10 | CF, GHG, SOC, GWP (IPCC AR6), CEI, NECB |
-| 🔗 **Nexus** | 10 | Composite index, trade-off matrix, sensitivity, radar, heatmap |
+| 💧 **Water** | 7 | WUE, WP (physical/economic), WF (green/blue/grey), irrigation efficiency, CWSI, CWP, depleted fraction |
+| ⚡ **Energy** | 11 | Energy budget from quantities, EUE, EROI, EP, energy intensity, specific energy, net energy, energy profitability |
+| 🌾 **Food** | 8 | FPI, crop yield index, HI, LER, SPI, caloric and protein yield, PEI |
+| 🧪 **Nutrient** | 8 | AE, PE, RE, PFP, IUE, NHI, NPK balance, one-call NUE report |
+| 🌿 **Carbon** | 7 | CF (source-wise), GHG (IPCC Tier 1), SOC stock, sequestration rate, GWP (AR6), CSI |
+| 🔗 **Nexus** | 16 | Normalization, composite index, entropy/CRITIC/PCA weights, TOPSIS, ranking robustness (Kendall's W), trade-off matrix and heatmap, sensitivity, radar, heatmap |
+| 🧭 **Workflow** | 2 | `nexus_analysis()`, `nexus_anova()` |
 
-## Quick Start
+## Quick start
+
+### Replicated field trial in one call
 
 ```r
 library(wefnexus)
+options(wefnexus.verbose = FALSE)   # silence messages
+data(arid_pulse_trial)              # 6 treatments x 3 replications (RCBD)
+
+res <- nexus_analysis(
+  arid_pulse_trial,
+  treatment = "treatment", block = "replication",
+  yield = "grain_yield", water = "total_water",
+  energy_in = "energy_input", energy_out = "energy_output",
+  emission = "ghg_emission", n_uptake = "n_uptake",
+  weights = "entropy"
+)
+res          # nexus index and TOPSIS ranks
+res$anova    # means + letters, SEm, CD (5%), CV
+plot(res$nexus)
+```
+
+### Figures
+
+```r
+plot(res$anova, response = c("grain_yield", "WUE", "EUE", "CI"), ncol = 2)
+```
+
+<img src="man/figures/README-anova.png" alt="Treatment means with standard error bars and LSD letter groups for grain yield, WUE, energy use efficiency and carbon intensity" width="100%" />
+
+```r
+plot(res)   # one radar per treatment, dashed line = mean of all treatments
+```
+
+<img src="man/figures/README-radar.png" alt="Radar small multiples of the five WEFNC dimension scores for six treatments" width="100%" />
+
+```r
+nx <- res$nexus
+indicators <- data.frame(WUE = nx$WUE_kg_mm, EUE = nx$EUE_ratio,
+                         Yield = nx$yield_kg_ha, IUE = nx$IUE_kg_kgN,
+                         CI = nx$carbon_intensity)
+rc <- nexus_rank_compare(indicators, benefit = c(TRUE, TRUE, TRUE, TRUE, FALSE),
+                         treatment_names = nx$treatment)
+plot(rc)    # do rankings hold across eight weighting/aggregation methods?
+```
+
+<img src="man/figures/README-ranks.png" alt="Rank chart of six treatments across eight ranking methods with Kendall's W" width="100%" />
+
+### Energy budget from field records
+
+```r
+inputs <- data.frame(
+  treatment = c("CT", "ZT"),
+  human_labour_man = c(320, 240), diesel = c(65, 38),
+  electricity = c(180, 75), nitrogen = c(20, 20), phosphorus = c(40, 40),
+  seed = c(20, 20), herbicide = c(0, 0.75),
+  grain = c(980, 1280), straw = c(1450, 1850)
+)
+energy_budget(inputs)
+```
+
+### Individual indicators
+
+```r
 data(arid_pulse_nexus)
 d <- arid_pulse_nexus
 
-# Water Use Efficiency
-wue <- water_use_efficiency(d$grain_yield, d$total_water)
-
-# Energy Return on Investment
-e_out <- d$energy_output_grain + d$energy_output_straw
-eroi(energy_out = e_out, energy_in = d$energy_input)
-
-# Carbon Footprint (IPCC AR6)
-carbon_footprint(diesel_use = d$diesel_use[1],
-                 electricity_use = d$electricity_kwh[1],
-                 n_fertilizer = d$n_applied[1],
-                 yield = d$grain_yield[1])
-
-# Full Nexus Summary
-nexus_summary(
-  yield = d$grain_yield,
-  water_consumed = d$total_water,
-  energy_input = d$energy_input,
-  energy_output = e_out,
-  n_applied = d$n_applied,
-  n_uptake = d$n_uptake,
-  carbon_emission = d$ghg_emission,
-  treatment_names = d$treatment
-)
+water_use_efficiency(d$grain_yield, d$total_water)
+eroi(d$energy_output_grain + d$energy_output_straw, d$energy_input)
+carbon_footprint(diesel_use = 65, electricity_use = 180,
+                 n_fertilizer = 20, yield = 980, ef_n2o = 0.005)
 ```
 
-## Key Features
+## Key features
 
-- **52 functions** across 6 integrated modules
-- **IPCC AR6 GWP** defaults: CH₄ = 27, N₂O = 273 (100-yr horizon)
-- **S3 classes** with `print()`, `summary()`, and `plot()` methods
-- **Publication-ready** radar plots, heatmaps, and sensitivity charts
-- **Vectorized** — process multiple treatments in one call
-- **Nutritional yield** analysis (protein, Fe, Zn, persons fed)
-- **Nexus sensitivity analysis** for weight perturbation assessment
-- **Conservation agriculture** focus (CT/ZT/PB comparisons)
-- **Arid and semi-arid** environment emphasis
-- **63 automated tests** — zero errors, zero warnings
-- **Free and open-source** under GPL-3
+- **59 functions** across 7 modules
+- **One-call workflow** for replicated trials (CRD and RCBD)
+- **Objective weighting** (entropy, CRITIC, PCA) and **TOPSIS** ranking
+- **IPCC AR6 GWP** defaults (CH4 = 27, N2O = 273) with adjustable emission factors
+- **Energy budgeting** from physical quantities with an editable coefficient table
+- **S3 classes** with `print()`, `summary()` and `plot()` methods
+- **Publication-ready figures** (ggplot2) for every result, plus base-R radar and heatmap
+- **Vectorized**: every indicator works on whole columns
+- **Arid and semi-arid, pulse-based and conservation agriculture** focus
+- **590+ test checks**, verified against hand calculations and reference implementations
+- Free and open source under GPL-3
 
 ## Documentation
 
@@ -113,17 +183,12 @@ browseVignettes("wefnexus")
 
 📖 **Full documentation website:** [https://lalitrolaniya.github.io/wefnexus/](https://lalitrolaniya.github.io/wefnexus/)
 
-## Data Format
+## Data format
 
-You can use either **treatment means** or **replication-level data** (recommended).
-
-Replication-level data (each row = one plot, i.e., Treatment × Replication) preserves variability and allows you to compute mean ± SE, generate error bars, and make statistical comparisons between treatments. All functions are vectorized — they compute results for every row at once.
-
-```r
-# Example: summarize by treatment after computation
-df$wue <- water_use_efficiency(df$yield, df$water)
-aggregate(wue ~ Treatment, data = df, FUN = mean)
-```
+Use **replication-level data** (one row per plot) where you can. It keeps
+the variability needed for ANOVA, SEm and CD, and `nexus_analysis()`
+handles the aggregation to treatment means. Treatment means also work;
+ANOVA is then skipped.
 
 ## Citation
 
@@ -136,7 +201,7 @@ citation("wefnexus")
 ```
 Rolaniya, L.K., Poonia, H., Jat, R.L., Punia, M. & Choudhary, R.R. (2026).
 wefnexus: Water-Energy-Food-Nutrient-Carbon Nexus Analysis for Agronomic
-Systems. R package version 1.0.0. https://CRAN.R-project.org/package=wefnexus
+Systems. R package version 1.1.0. https://CRAN.R-project.org/package=wefnexus
 DOI: 10.32614/CRAN.package.wefnexus
 ```
 
@@ -145,10 +210,12 @@ DOI: 10.32614/CRAN.package.wefnexus
 | Author | Affiliation |
 |--------|-------------|
 | **Lalit Kumar Rolaniya** (maintainer) | Scientist (Agronomy), ICAR-IIPR RC Bikaner |
-| **Hemant Poonia** | Assistant Professor, Dept of Mathematics & Statistics, CCS HAU Hisar |
+| **Hemant Poonia** (deceased) | Assistant Professor, Dept of Mathematics & Statistics, CCS HAU Hisar |
 | **Ram Lal Jat** | Scientist, ICAR-IIPR RC Bikaner |
-| **Monika Punia** | Scientist, ICAR-IIPR RC Bikaner |
+| **Monika Punia** (deceased) | Scientist, ICAR-IIPR RC Bikaner |
 | **Raja Ram Choudhary** | Scientist, ICAR-IIGR RRS Bikaner |
+
+*Version 1.1.0 is dedicated to the memory of our co-authors Dr. Monika Punia and Dr. Hemant Poonia.*
 
 ## Links
 
@@ -161,7 +228,7 @@ DOI: 10.32614/CRAN.package.wefnexus
 
 ## Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! Please see [CONTRIBUTING.md](https://github.com/lalitrolaniya/wefnexus/blob/main/CONTRIBUTING.md) for guidelines.
 
 Found a bug? Have a feature request? [Open an issue](https://github.com/lalitrolaniya/wefnexus/issues)
 

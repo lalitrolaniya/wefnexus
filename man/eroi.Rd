@@ -4,7 +4,12 @@
 \alias{eroi}
 \title{Energy Return on Investment (EROI)}
 \usage{
-eroi(energy_out, energy_in, include_solar = FALSE, verbose = TRUE)
+eroi(
+  energy_out,
+  energy_in,
+  include_solar = FALSE,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{energy_out}{Numeric vector. Total energy output from the

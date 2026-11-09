@@ -11,7 +11,7 @@ water_footprint(
   yield,
   area = 1,
   per_ton = FALSE,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -27,13 +27,16 @@ Default is 0.}
 
 \item{yield}{Numeric vector. Crop yield (kg/ha).}
 
-\item{area}{Numeric. Crop area in hectares. Default is 1.}
+\item{area}{Deprecated and ignored. Water use (mm) and yield (kg/ha)
+are both per hectare, so the area cancels out. Versions before
+1.1.0 multiplied the footprint by \code{area}, which was incorrect.}
 
 \item{per_ton}{Logical. If \code{TRUE}, returns water footprint in
 m3/ton. Default \code{FALSE}, returning m3/kg.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 A data frame with four numeric columns:

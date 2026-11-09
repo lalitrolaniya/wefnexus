@@ -11,7 +11,8 @@ nutrient_use_efficiency(
   uptake_treated,
   uptake_control,
   nutrient_name = "N",
-  verbose = TRUE
+  grain_uptake = NULL,
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -30,8 +31,14 @@ fertilizer (kg/ha).}
 \item{nutrient_name}{Character. Name of the nutrient for labeling
 (e.g., "N", "P", "K"). Default "N".}
 
+\item{grain_uptake}{Numeric. Nutrient uptake in grain of the treated
+crop (kg/ha). Used to compute the nutrient harvest index. If
+\code{NULL} (default), the nutrient harvest index is returned as
+\code{NA}.}
+
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 A data frame with one row and seven columns:
@@ -44,8 +51,9 @@ A data frame with one row and seven columns:
     (kg/kg)}
   \item{internal_util_eff}{Numeric. Internal utilization efficiency
     (kg/kg)}
-  \item{nutrient_harvest_idx}{Numeric. Estimated nutrient harvest
-    index (proportion, based on 0.75 grain-to-total ratio assumption)}
+  \item{nutrient_harvest_idx}{Numeric. Nutrient harvest index
+    (grain uptake / total uptake). \code{NA} when
+    \code{grain_uptake} is not supplied.}
 }
 }
 \description{
@@ -53,13 +61,18 @@ Computes all major nutrient use efficiency metrics for a given
 nutrient in a single call.
 }
 \details{
-Formula: \deqn{NUE = \frac{Yield}{Nutrient Applied}}
+Returns agronomic efficiency (AE), physiological efficiency
+  (PE), recovery efficiency (RE), partial factor productivity (PFP),
+  internal utilization efficiency (IUE) and nutrient harvest index
+  (NHI). See the individual functions for formulas. Versions before
+  1.1.0 returned a fixed NHI of 0.75; NHI is now computed from
+  \code{grain_uptake}.
 }
 \examples{
 nutrient_use_efficiency(
   yield_treated = 4500, yield_control = 3000,
   nutrient_applied = 120, uptake_treated = 100,
-  uptake_control = 60, nutrient_name = "N"
+  uptake_control = 60, nutrient_name = "N", grain_uptake = 72
 )
 
 }

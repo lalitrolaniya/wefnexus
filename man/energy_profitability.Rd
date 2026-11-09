@@ -4,7 +4,11 @@
 \alias{energy_profitability}
 \title{Energy Profitability}
 \usage{
-energy_profitability(gross_return, energy_in, verbose = TRUE)
+energy_profitability(
+  gross_return,
+  energy_in,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{gross_return}{Numeric vector. Gross economic return (currency/ha).}
@@ -12,7 +16,8 @@ energy_profitability(gross_return, energy_in, verbose = TRUE)
 \item{energy_in}{Numeric vector. Total energy input (MJ/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Energy profitability (currency/MJ).
@@ -21,7 +26,10 @@ Numeric vector. Energy profitability (currency/MJ).
 Economic return per unit of energy invested.
 }
 \details{
-Formula: \deqn{EPr = \frac{Energy Output - Energy Input}{Energy Input}}{EPr = (Energy Output - Energy Input) / Energy Input}
+Formula: \deqn{EPr = \frac{GR}{E_{in}}}{EPr = GR / E_in}
+  where GR is gross return (currency/ha) and \eqn{E_{in}} is energy
+  input (MJ/ha). The energy-based ratio (output - input) / input is
+  \code{net_energy(out, in) / in}, or EUE minus 1.
 }
 \examples{
 energy_profitability(gross_return = 112500, energy_in = 12000)

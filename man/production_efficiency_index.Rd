@@ -4,7 +4,11 @@
 \alias{production_efficiency_index}
 \title{Production Efficiency Index (PEI)}
 \usage{
-production_efficiency_index(yield, cost, verbose = TRUE)
+production_efficiency_index(
+  yield,
+  cost,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{yield}{Numeric vector. Crop yield (kg/ha).}
@@ -12,7 +16,8 @@ production_efficiency_index(yield, cost, verbose = TRUE)
 \item{cost}{Numeric vector. Total cost of production (currency/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Production efficiency index (kg/currency unit).
@@ -22,7 +27,9 @@ Yield produced per unit of production cost, measuring economic
 efficiency of crop production.
 }
 \details{
-Formula: \deqn{PEI = \frac{Yield}{Total Input Cost} \times 100}{PEI = (Yield / Total Input Cost) * 100}
+Formula: \deqn{PEI = \frac{Y}{C}}{PEI = Y / C}
+  where Y is yield (kg/ha) and C is the total cost of production
+  (currency/ha).
 }
 \examples{
 production_efficiency_index(yield = 4500, cost = 28500)

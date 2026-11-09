@@ -4,7 +4,12 @@
 \alias{carbon_sequestration_rate}
 \title{Carbon Sequestration Rate}
 \usage{
-carbon_sequestration_rate(soc_initial, soc_final, years, verbose = TRUE)
+carbon_sequestration_rate(
+  soc_initial,
+  soc_final,
+  years,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{soc_initial}{Numeric vector. Initial SOC stock (Mg C/ha).}
@@ -14,7 +19,8 @@ carbon_sequestration_rate(soc_initial, soc_final, years, verbose = TRUE)
 \item{years}{Numeric. Number of years between measurements.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Carbon sequestration rate (Mg C/ha/year).

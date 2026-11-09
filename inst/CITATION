@@ -9,7 +9,7 @@ bibentry(
     person("Raja Ram", "Choudhary")
   ),
   year     = "2026",
-  note     = "R package version 1.0.0",
+  note     = sprintf("R package version %s", meta$Version),
   url      = "https://CRAN.R-project.org/package=wefnexus",
   doi      = "10.32614/CRAN.package.wefnexus"
 )

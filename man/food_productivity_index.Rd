@@ -9,7 +9,7 @@ food_productivity_index(
   reference_yield,
   protein_content = NULL,
   caloric_value = NULL,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -24,7 +24,8 @@ Default \code{NULL}.}
 Default \code{NULL}.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Food productivity index on a 0 to 1 scale.
@@ -36,7 +37,14 @@ Computes a composite food productivity index considering yield
 relative to potential, and optionally nutritional quality.
 }
 \details{
-Formula: \deqn{FPI = \frac{Yield}{Reference Yield} \times 100}{FPI = (Yield / Reference Yield) * 100}
+Without protein and caloric values,
+  \deqn{FPI = \min(Y / Y_{ref}, 1)}{FPI = min(Y / Y_ref, 1)}
+  With both supplied,
+  \deqn{FPI = 0.5 \min(Y / Y_{ref}, 1) + 0.25 \min(P / 40, 1) +
+  0.25 \min(C / 400, 1)}{FPI = 0.5 min(Y/Y_ref, 1) + 0.25 min(P/40, 1) + 0.25 min(C/400, 1)}
+  where P is protein (percent) and C is caloric value (kcal/100 g);
+  40 percent protein and 400 kcal/100 g are the upper reference
+  values. The index is on a 0 to 1 scale.
 }
 \examples{
 food_productivity_index(yield = 4500, reference_yield = 6000,

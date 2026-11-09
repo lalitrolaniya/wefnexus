@@ -8,7 +8,7 @@ carbon_sustainability_index(
   yield,
   carbon_emission,
   carbon_sequestered = 0,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -21,7 +21,8 @@ carbon_sustainability_index(
 soil (kg CO2-eq/ha). Default 0.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Carbon sustainability index. Higher values
@@ -33,7 +34,9 @@ Ratio of yield to net carbon emission, accounting for carbon
 sequestration by the soil.
 }
 \details{
-Formula: \deqn{CSI = \frac{Yield}{Carbon Footprint}}
+Formula: \deqn{CSI = \frac{Y}{E - S}}{CSI = Y / (E - S)}
+  where Y is yield (kg/ha), E is GHG emission and S is carbon
+  sequestered (both kg CO2-eq/ha).
 }
 \examples{
 carbon_sustainability_index(yield = 4500, carbon_emission = 2500,

@@ -118,13 +118,12 @@ print.cf_result <- function(x, ...) {
 plot.cf_result <- function(x, ...) {
   bd <- x$breakdown
   bd <- bd[bd$emission_kg_CO2eq > 0, ]
+  bd <- bd[order(bd$emission_kg_CO2eq), ]
   old_par <- graphics::par(no.readonly = TRUE)
   on.exit(graphics::par(old_par))
   graphics::par(mar = c(5, 8, 4, 2))
-  cols <- c("#F44336", "#FF9800", "#4CAF50", "#2196F3", "#9C27B0",
-            "#795548", "#607D8B", "#E91E63", "#00BCD4")
   graphics::barplot(bd$emission_kg_CO2eq, names.arg = bd$source,
-          horiz = TRUE, las = 1, col = cols[seq_len(nrow(bd))],
+          horiz = TRUE, las = 1, col = .wef_cols[1], border = NA,
           xlab = "kg CO2-eq/ha",
           main = paste("Carbon Footprint:", x$total_cf, "kg CO2-eq/ha"),
           ...)

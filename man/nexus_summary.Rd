@@ -9,12 +9,14 @@ nexus_summary(
   water_consumed,
   energy_input,
   energy_output,
-  n_applied,
-  n_uptake,
+  n_applied = NULL,
+  n_uptake = NULL,
   carbon_emission,
   treatment_names = NULL,
   weights = rep(0.2, 5),
-  verbose = TRUE
+  nutrient_metric = c("pfp", "iue"),
+  carbon_basis = c("emission", "intensity"),
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -26,9 +28,13 @@ nexus_summary(
 
 \item{energy_output}{Numeric vector. Total energy output (MJ/ha).}
 
-\item{n_applied}{Numeric vector. Nitrogen applied (kg/ha).}
+\item{n_applied}{Numeric vector. Nitrogen applied (kg/ha). Needed when
+\code{nutrient_metric = "pfp"}. May be \code{NULL} when
+\code{nutrient_metric = "iue"}.}
 
-\item{n_uptake}{Numeric vector. Nitrogen total uptake (kg/ha).}
+\item{n_uptake}{Numeric vector. Total plant nitrogen uptake (kg/ha).
+Needed when \code{nutrient_metric = "iue"}; when supplied, internal
+utilization efficiency is also reported.}
 
 \item{carbon_emission}{Numeric vector. Total GHG emission
 (kg CO2-eq/ha).}
@@ -36,14 +42,30 @@ nexus_summary(
 \item{treatment_names}{Character vector. Treatment labels.
 Default \code{NULL}.}
 
-\item{weights}{Numeric vector of length 5. Dimension weights.
-Default equal weights.}
+\item{weights}{Numeric vector of length 5 (Water, Energy, Food,
+Nutrient, Carbon) summing to 1, or one of \code{"equal"},
+\code{"entropy"}, \code{"critic"} or \code{"pca"} to derive
+weights with \code{\link{nexus_weights}}. Default equal weights.}
+
+\item{nutrient_metric}{Character. Indicator for the nutrient dimension:
+\code{"pfp"} (partial factor productivity of applied N, default) or
+\code{"iue"} (internal utilization efficiency, yield per kg N
+uptake). Use \code{"iue"} for legumes grown without fertilizer N,
+where PFP cannot be computed.}
+
+\item{carbon_basis}{Character. Indicator for the carbon dimension:
+\code{"emission"} (total emission per ha, default, as in version
+1.0.0) or \code{"intensity"} (emission per kg yield). Intensity
+avoids penalising high-yielding treatments for larger absolute
+emissions.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
-A data frame with one row per treatment and columns:
+A data frame of class \code{nexus_result} with one row per
+  treatment and columns:
 \describe{
   \item{treatment}{Character. Treatment name}
   \item{yield_kg_ha}{Numeric. Crop yield}
@@ -51,7 +73,8 @@ A data frame with one row per treatment and columns:
   \item{EUE_ratio}{Numeric. Energy use efficiency ratio}
   \item{EROI}{Numeric. Energy return on investment}
   \item{net_energy_MJ}{Numeric. Net energy balance}
-  \item{PFP_kg_kgN}{Numeric. Partial factor productivity of N}
+  \item{PFP_kg_kgN}{Numeric. Partial factor productivity of N
+    (\code{NA} when N applied is missing or zero)}
   \item{carbon_eff}{Numeric. Carbon efficiency}
   \item{carbon_intensity}{Numeric. Carbon intensity}
   \item{W_score}{Numeric. Normalized water score}
@@ -60,12 +83,28 @@ A data frame with one row per treatment and columns:
   \item{N_score}{Numeric. Normalized nutrient score}
   \item{C_score}{Numeric. Normalized carbon score}
   \item{nexus_index}{Numeric. Composite nexus index}
+  \item{IUE_kg_kgN}{Numeric. Internal utilization efficiency of N
+    (\code{NA} when \code{n_uptake} is not supplied)}
+  \item{rank}{Integer. Rank by nexus index (1 = best)}
 }
+The weights used are stored in \code{attr(result, "weights")}.
 }
 \description{
 Generates a comprehensive one-call nexus analysis from raw
 agronomic field data, computing all dimension metrics, normalizing,
 and producing the composite index.
+}
+\details{
+Each dimension indicator is min-max normalized across the
+  treatments supplied (carbon is inverted, so lower emission scores
+  higher). Scores are therefore relative to the set of treatments
+  being compared; with only two treatments every score is 0 or 1.
+  Min-max scaling stretches any spread to the full 0 to 1 range, so a
+  small absolute difference (for example 2 percent in IUE) can look as
+  large as a big one; check the raw indicators before interpreting.
+  When every treatment receives the same N, PFP is proportional to
+  yield, so the function warns and \code{nutrient_metric = "iue"} is
+  the better choice.
 }
 \examples{
 \donttest{
@@ -74,11 +113,22 @@ nexus_summary(
   water_consumed = c(450, 400, 350),
   energy_input = c(12000, 11000, 9500),
   energy_output = c(135000, 125000, 112000),
-  n_applied = c(120, 120, 120),
+  n_applied = c(150, 120, 90),
   n_uptake = c(100, 90, 80),
   carbon_emission = c(2500, 2200, 1800),
   treatment_names = c("CA+Drip", "CT+Sprinkler", "ZT+Rainfed")
 )
 
+# Legume without fertilizer N, carbon scored per kg grain
+nexus_summary(
+  yield = c(950, 870, 780),
+  water_consumed = c(260, 240, 220),
+  energy_input = c(5200, 4800, 4100),
+  energy_output = c(36000, 33000, 29500),
+  n_applied = c(0, 0, 0),
+  n_uptake = c(62, 57, 50),
+  carbon_emission = c(610, 560, 470),
+  nutrient_metric = "iue", carbon_basis = "intensity"
+)
 }
 }

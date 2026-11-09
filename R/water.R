@@ -12,7 +12,8 @@
 #' @param water_consumed Numeric vector. Total water consumed (mm), typically
 #'   evapotranspiration (ET), or irrigation applied plus effective rainfall.
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Water use efficiency in kg/ha/mm. Higher values
 #'   indicate more efficient use of water for crop production.
@@ -34,7 +35,7 @@
 #' 864, 160992. \doi{10.1016/j.scitotenv.2022.160992}
 #'
 #' @export
-water_use_efficiency <- function(yield, water_consumed, verbose = TRUE) {
+water_use_efficiency <- function(yield, water_consumed, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield, "yield")
   .validate_positive(water_consumed, "water_consumed")
   .validate_same_length(yield, water_consumed)
@@ -54,7 +55,8 @@ water_use_efficiency <- function(yield, water_consumed, verbose = TRUE) {
 #' @param unit Character. Unit of water input: \code{"mm"} (default) or
 #'   \code{"m3"}.
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Physical water productivity in kg/m3 when
 #'   \code{price} is \code{NULL}, or economic water productivity in
@@ -80,7 +82,7 @@ water_use_efficiency <- function(yield, water_consumed, verbose = TRUE) {
 #'
 #' @export
 water_productivity <- function(yield, water_applied, price = NULL,
-                               unit = "mm", verbose = TRUE) {
+                               unit = "mm", verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield, "yield")
   .validate_positive(water_applied, "water_applied")
   .validate_same_length(yield, water_applied)
@@ -110,11 +112,14 @@ water_productivity <- function(yield, water_applied, price = NULL,
 #'   required to dilute pollutant load to acceptable standards (mm).
 #'   Default is 0.
 #' @param yield Numeric vector. Crop yield (kg/ha).
-#' @param area Numeric. Crop area in hectares. Default is 1.
+#' @param area Deprecated and ignored. Water use (mm) and yield (kg/ha)
+#'   are both per hectare, so the area cancels out. Versions before
+#'   1.1.0 multiplied the footprint by \code{area}, which was incorrect.
 #' @param per_ton Logical. If \code{TRUE}, returns water footprint in
 #'   m3/ton. Default \code{FALSE}, returning m3/kg.
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return A data frame with four numeric columns:
 #' \describe{
@@ -146,12 +151,16 @@ water_productivity <- function(yield, water_applied, price = NULL,
 #' @export
 water_footprint <- function(green_water, blue_water, grey_water = 0,
                             yield, area = 1, per_ton = FALSE,
-                            verbose = TRUE) {
+                            verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(green_water, "green_water")
   .validate_numeric(blue_water, "blue_water")
   .validate_numeric(grey_water, "grey_water")
   .validate_positive(yield, "yield")
-  factor <- 10 * area
+  if (!missing(area) && !isTRUE(all.equal(area, 1))) {
+    warning("'area' is deprecated and ignored: water (mm) and yield ",
+            "(kg/ha) are both per hectare.", call. = FALSE)
+  }
+  factor <- 10
   divisor <- if (per_ton) yield / 1000 else yield
   green_wf <- (green_water * factor) / divisor
   blue_wf  <- (blue_water * factor) / divisor
@@ -184,7 +193,8 @@ water_footprint <- function(green_water, blue_water, grey_water = 0,
 #' @param crop_et Numeric vector. Crop evapotranspiration (mm).
 #'   If \code{NULL}, consumptive use efficiency is not computed.
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return A data frame with efficiency metrics expressed as percentages.
 #'   Columns depend on inputs provided:
@@ -209,7 +219,7 @@ water_footprint <- function(green_water, blue_water, grey_water = 0,
 #' @export
 irrigation_efficiency <- function(water_delivered, water_diverted,
                                   water_stored = NULL, crop_et = NULL,
-                                  verbose = TRUE) {
+                                  verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_positive(water_delivered, "water_delivered")
   .validate_positive(water_diverted, "water_diverted")
   result <- data.frame(
@@ -230,14 +240,16 @@ irrigation_efficiency <- function(water_delivered, water_diverted,
 
 #' Crop Water Stress Index (CWSI)
 #'
-#' Computes the Crop Water Stress Index based on the ratio of actual
-#' to potential evapotranspiration.
+#' Computes the Crop Water Stress Index from the ratio of actual to
+#' potential evapotranspiration (the evapotranspiration form of the
+#' index described by Jackson et al., 1981).
 #'
 #' @param actual_et Numeric vector. Actual evapotranspiration (mm).
 #' @param potential_et Numeric vector. Potential or reference
 #'   evapotranspiration (mm).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. CWSI values between 0 (no stress) and 1
 #'   (maximum stress). Values close to 0 indicate well-watered conditions;
@@ -250,13 +262,18 @@ irrigation_efficiency <- function(water_delivered, water_diverted,
 #' crop_water_stress_index(c(4.5, 3.8, 3.0, 2.2), c(5.0, 5.0, 5.0, 5.0))
 #'
 #' @references
+#' Jackson, R.D., Idso, S.B., Reginato, R.J. & Pinter, P.J. (1981).
+#' Canopy temperature as a crop water stress indicator.
+#' \emph{Water Resources Research}, 17(4), 1133-1138.
+#' \doi{10.1029/WR017i004p01133}
+#'
 #' Idso, S.B. et al. (1981). Normalizing the stress-degree-day parameter
 #' for environmental variability. \emph{Agricultural Meteorology}, 24, 45-55.
 #' \doi{10.1016/0002-1571(81)90032-7}
 #'
 #' @export
 crop_water_stress_index <- function(actual_et, potential_et,
-                                    verbose = TRUE) {
+                                    verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(actual_et, "actual_et")
   .validate_positive(potential_et, "potential_et")
   .validate_same_length(actual_et, potential_et)
@@ -274,7 +291,8 @@ crop_water_stress_index <- function(actual_et, potential_et,
 #' @param yield Numeric vector. Crop yield (kg/ha).
 #' @param et Numeric vector. Seasonal evapotranspiration (mm).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Crop water productivity (kg/m3).
 #'
@@ -292,7 +310,7 @@ crop_water_stress_index <- function(actual_et, potential_et,
 #' \doi{10.1016/j.agwat.2004.04.007}
 #'
 #' @export
-crop_water_productivity <- function(yield, et, verbose = TRUE) {
+crop_water_productivity <- function(yield, et, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield, "yield")
   .validate_positive(et, "et")
   .validate_same_length(yield, et)
@@ -313,7 +331,8 @@ crop_water_productivity <- function(yield, et, verbose = TRUE) {
 #' @param total_inflow Numeric vector. Total water inflow: irrigation plus
 #'   effective rainfall (mm).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Depleted fraction (proportion, 0 to 1).
 #'
@@ -327,7 +346,7 @@ crop_water_productivity <- function(yield, et, verbose = TRUE) {
 #' 1517-1524. \doi{10.1016/j.agwat.2009.05.005}
 #'
 #' @export
-depleted_fraction <- function(crop_et, total_inflow, verbose = TRUE) {
+depleted_fraction <- function(crop_et, total_inflow, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(crop_et, "crop_et")
   .validate_positive(total_inflow, "total_inflow")
   .validate_same_length(crop_et, total_inflow)

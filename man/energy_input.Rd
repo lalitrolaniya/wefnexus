@@ -20,7 +20,7 @@ energy_input(
   biofertilizer = 0,
   solar_energy = 0,
   other = 0,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -65,7 +65,8 @@ Default 0.}
 \item{other}{Numeric. Any additional energy inputs (MJ/ha). Default 0.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric. Total energy input (MJ/ha), computed as the sum of all

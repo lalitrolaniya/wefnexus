@@ -4,7 +4,11 @@
 \alias{energy_use_efficiency}
 \title{Energy Use Efficiency (EUE)}
 \usage{
-energy_use_efficiency(energy_out, energy_in, verbose = TRUE)
+energy_use_efficiency(
+  energy_out,
+  energy_in,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{energy_out}{Numeric vector. Total energy output (MJ/ha).}
@@ -12,7 +16,8 @@ energy_use_efficiency(energy_out, energy_in, verbose = TRUE)
 \item{energy_in}{Numeric vector. Total energy input (MJ/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Energy use efficiency (dimensionless ratio).

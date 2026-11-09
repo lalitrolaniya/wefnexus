@@ -4,7 +4,11 @@
 \alias{protein_yield}
 \title{Protein Yield}
 \usage{
-protein_yield(yield, protein_content, verbose = TRUE)
+protein_yield(
+  yield,
+  protein_content,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{yield}{Numeric vector. Crop yield (kg/ha).}
@@ -12,7 +16,8 @@ protein_yield(yield, protein_content, verbose = TRUE)
 \item{protein_content}{Numeric vector. Protein content (percent).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Protein yield (kg/ha).

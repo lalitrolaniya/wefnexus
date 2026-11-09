@@ -4,7 +4,11 @@
 \alias{crop_yield_index}
 \title{Crop Yield Index (CYI)}
 \usage{
-crop_yield_index(yield, check_yield, verbose = TRUE)
+crop_yield_index(
+  yield,
+  check_yield,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{yield}{Numeric vector. Treatment yields (kg/ha).}
@@ -12,7 +16,8 @@ crop_yield_index(yield, check_yield, verbose = TRUE)
 \item{check_yield}{Numeric. Control or check yield (kg/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Yield index where 1.0 equals the check yield.
@@ -22,7 +27,8 @@ Numeric vector. Yield index where 1.0 equals the check yield.
 Relative yield performance compared to a check or control treatment.
 }
 \details{
-Formula: \deqn{CYI = \frac{Yield}{Maximum Yield} \times 100}{CYI = (Yield / Maximum Yield) * 100}
+Formula: \deqn{CYI = \frac{Y}{Y_{check}}}{CYI = Y / Y_check}
+  Multiply by 100 to express as a percentage of the check.
 }
 \examples{
 crop_yield_index(yield = c(4500, 4200, 3800), check_yield = 4000)

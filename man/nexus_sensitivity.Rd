@@ -12,7 +12,7 @@ nexus_sensitivity(
   carbon_score,
   treatment_names = NULL,
   steps = 20,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -32,7 +32,8 @@ nexus_sensitivity(
 Default 20.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints a message.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 A data frame with columns: dimension, weight, treatment,

@@ -9,7 +9,7 @@ water_productivity(
   water_applied,
   price = NULL,
   unit = "mm",
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -24,7 +24,8 @@ If \code{NULL} (default), returns physical water productivity.}
 \code{"m3"}.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Physical water productivity in kg/m3 when

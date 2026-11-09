@@ -4,7 +4,11 @@
 \alias{harvest_index}
 \title{Harvest Index (HI)}
 \usage{
-harvest_index(economic_yield, biological_yield, verbose = TRUE)
+harvest_index(
+  economic_yield,
+  biological_yield,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{economic_yield}{Numeric vector. Grain or economic yield (kg/ha).}
@@ -13,7 +17,8 @@ harvest_index(economic_yield, biological_yield, verbose = TRUE)
 yield (kg/ha), which is grain plus straw/stover.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Harvest index as a proportion (0 to 1).

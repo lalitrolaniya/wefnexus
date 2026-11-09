@@ -4,7 +4,12 @@
 \alias{system_productivity_index}
 \title{System Productivity Index (SPI)}
 \usage{
-system_productivity_index(yields, prices, base_price, verbose = TRUE)
+system_productivity_index(
+  yields,
+  prices,
+  base_price,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{yields}{Numeric vector. Yields of individual crops in the
@@ -17,7 +22,8 @@ system (kg/ha).}
 (currency/kg).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric. System productivity expressed as base crop equivalent

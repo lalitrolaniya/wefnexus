@@ -11,7 +11,7 @@ nexus_index(
   nutrient_score,
   carbon_score,
   weights = rep(0.2, 5),
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -32,7 +32,8 @@ Food, Nutrient, and Carbon dimensions. Must sum to 1. Default is
 equal weighting (0.2 each).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Composite nexus index on a 0 to 1 scale,

@@ -4,7 +4,11 @@
 \alias{water_use_efficiency}
 \title{Water Use Efficiency (WUE)}
 \usage{
-water_use_efficiency(yield, water_consumed, verbose = TRUE)
+water_use_efficiency(
+  yield,
+  water_consumed,
+  verbose = getOption("wefnexus.verbose", TRUE)
+)
 }
 \arguments{
 \item{yield}{Numeric vector. Crop yield (kg/ha).}
@@ -13,7 +17,8 @@ water_use_efficiency(yield, water_consumed, verbose = TRUE)
 evapotranspiration (ET), or irrigation applied plus effective rainfall.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Water use efficiency in kg/ha/mm. Higher values

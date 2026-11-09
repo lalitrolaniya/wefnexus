@@ -37,7 +37,8 @@
 #'   Default 0.
 #' @param other Numeric. Any additional energy inputs (MJ/ha). Default 0.
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric. Total energy input (MJ/ha), computed as the sum of all
 #'   individual energy input components.
@@ -63,7 +64,7 @@ energy_input <- function(seed = 0, fertilizer_n = 0, fertilizer_p = 0,
                          machinery = 0, irrigation = 0,
                          micronutrient = 0, biofertilizer = 0,
                          solar_energy = 0, other = 0,
-                         verbose = TRUE) {
+                         verbose = getOption("wefnexus.verbose", TRUE)) {
   total <- seed + fertilizer_n + fertilizer_p + fertilizer_k + fym +
     pesticide + diesel + electricity + human_labour + machinery +
     irrigation + micronutrient + biofertilizer + solar_energy + other
@@ -84,7 +85,8 @@ energy_input <- function(seed = 0, fertilizer_n = 0, fertilizer_p = 0,
 #' @param straw_energy_coeff Numeric. Energy coefficient for straw (MJ/kg).
 #'   Default 12.5 (wheat straw equivalent).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Total energy output (MJ/ha).
 #'
@@ -107,7 +109,7 @@ energy_input <- function(seed = 0, fertilizer_n = 0, fertilizer_p = 0,
 energy_output <- function(grain_yield, straw_yield = 0,
                           grain_energy_coeff = 14.7,
                           straw_energy_coeff = 12.5,
-                          verbose = TRUE) {
+                          verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(grain_yield, "grain_yield")
   .validate_non_negative(grain_yield, "grain_yield")
   total <- (grain_yield * grain_energy_coeff) + (straw_yield * straw_energy_coeff)
@@ -122,7 +124,8 @@ energy_output <- function(grain_yield, straw_yield = 0,
 #' @param energy_out Numeric vector. Total energy output (MJ/ha).
 #' @param energy_in Numeric vector. Total energy input (MJ/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Energy use efficiency (dimensionless ratio).
 #'   Values greater than 1 indicate a positive energy balance.
@@ -134,7 +137,7 @@ energy_output <- function(grain_yield, straw_yield = 0,
 #' energy_use_efficiency(energy_out = 135000, energy_in = 12000)
 #'
 #' @export
-energy_use_efficiency <- function(energy_out, energy_in, verbose = TRUE) {
+energy_use_efficiency <- function(energy_out, energy_in, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(energy_out, "energy_out")
   .validate_positive(energy_in, "energy_in")
   .validate_same_length(energy_out, energy_in)
@@ -205,7 +208,7 @@ energy_use_efficiency <- function(energy_out, energy_in, verbose = TRUE) {
 #'
 #' @export
 eroi <- function(energy_out, energy_in, include_solar = FALSE,
-                 verbose = TRUE) {
+                 verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(energy_out, "energy_out")
   .validate_positive(energy_in, "energy_in")
   .validate_same_length(energy_out, energy_in)
@@ -230,7 +233,8 @@ eroi <- function(energy_out, energy_in, include_solar = FALSE,
 #' @param yield Numeric vector. Crop yield (kg/ha).
 #' @param energy_in Numeric vector. Total energy input (MJ/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Energy productivity (kg/MJ). Higher values
 #'   indicate better yield per unit energy invested.
@@ -239,7 +243,7 @@ eroi <- function(energy_out, energy_in, include_solar = FALSE,
 #' energy_productivity(yield = 4500, energy_in = 12000)
 #'
 #' @export
-energy_productivity <- function(yield, energy_in, verbose = TRUE) {
+energy_productivity <- function(yield, energy_in, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(yield, "yield")
   .validate_positive(energy_in, "energy_in")
   .validate_same_length(yield, energy_in)
@@ -258,7 +262,8 @@ energy_productivity <- function(yield, energy_in, verbose = TRUE) {
 #' @param energy_in Numeric vector. Total energy input (MJ/ha).
 #' @param yield Numeric vector. Crop yield (kg/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Energy intensity (MJ/kg). Lower values indicate
 #'   more energy-efficient production.
@@ -267,7 +272,7 @@ energy_productivity <- function(yield, energy_in, verbose = TRUE) {
 #' energy_intensity(energy_in = 12000, yield = 4500)
 #'
 #' @export
-energy_intensity <- function(energy_in, yield, verbose = TRUE) {
+energy_intensity <- function(energy_in, yield, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(energy_in, "energy_in")
   .validate_positive(yield, "yield")
   .validate_same_length(energy_in, yield)
@@ -282,12 +287,19 @@ energy_intensity <- function(energy_in, yield, verbose = TRUE) {
 #' cropping systems of different durations.
 #'
 #'
-#' @details Formula: \deqn{SE = \frac{Energy Input}{Area}}{SE = Energy Input / Area}
+#' @details Formula: \deqn{SE = \frac{E_{in}}{d}}{SE = E_in / d}
+#'   where \eqn{E_{in}} is energy input (MJ/ha) and \eqn{d} is crop
+#'   duration (days).
+#'
+#'   Note that much of the energy budgeting literature uses "specific
+#'   energy" for energy input per kg of produce (MJ/kg). That quantity is
+#'   returned by \code{\link{energy_intensity}}.
 #'
 #' @param energy_in Numeric vector. Total energy input (MJ/ha).
 #' @param duration Numeric vector. Crop duration (days).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Specific energy (MJ/ha/day).
 #'
@@ -295,7 +307,7 @@ energy_intensity <- function(energy_in, yield, verbose = TRUE) {
 #' specific_energy(energy_in = 12000, duration = 150)
 #'
 #' @export
-specific_energy <- function(energy_in, duration, verbose = TRUE) {
+specific_energy <- function(energy_in, duration, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(energy_in, "energy_in")
   .validate_positive(duration, "duration")
   .validate_same_length(energy_in, duration)
@@ -314,7 +326,8 @@ specific_energy <- function(energy_in, duration, verbose = TRUE) {
 #' @param energy_out Numeric vector. Total energy output (MJ/ha).
 #' @param energy_in Numeric vector. Total energy input (MJ/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Net energy (MJ/ha). Positive values indicate
 #'   net energy gain; negative values indicate net energy loss.
@@ -323,7 +336,7 @@ specific_energy <- function(energy_in, duration, verbose = TRUE) {
 #' net_energy(energy_out = 135000, energy_in = 12000)
 #'
 #' @export
-net_energy <- function(energy_out, energy_in, verbose = TRUE) {
+net_energy <- function(energy_out, energy_in, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(energy_out, "energy_out")
   .validate_numeric(energy_in, "energy_in")
   .validate_same_length(energy_out, energy_in)
@@ -337,12 +350,16 @@ net_energy <- function(energy_out, energy_in, verbose = TRUE) {
 #' Economic return per unit of energy invested.
 #'
 #'
-#' @details Formula: \deqn{EPr = \frac{Energy Output - Energy Input}{Energy Input}}{EPr = (Energy Output - Energy Input) / Energy Input}
+#' @details Formula: \deqn{EPr = \frac{GR}{E_{in}}}{EPr = GR / E_in}
+#'   where GR is gross return (currency/ha) and \eqn{E_{in}} is energy
+#'   input (MJ/ha). The energy-based ratio (output - input) / input is
+#'   \code{net_energy(out, in) / in}, or EUE minus 1.
 #'
 #' @param gross_return Numeric vector. Gross economic return (currency/ha).
 #' @param energy_in Numeric vector. Total energy input (MJ/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Energy profitability (currency/MJ).
 #'
@@ -350,7 +367,7 @@ net_energy <- function(energy_out, energy_in, verbose = TRUE) {
 #' energy_profitability(gross_return = 112500, energy_in = 12000)
 #'
 #' @export
-energy_profitability <- function(gross_return, energy_in, verbose = TRUE) {
+energy_profitability <- function(gross_return, energy_in, verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(gross_return, "gross_return")
   .validate_positive(energy_in, "energy_in")
   .validate_same_length(gross_return, energy_in)
@@ -370,7 +387,8 @@ energy_profitability <- function(gross_return, energy_in, verbose = TRUE) {
 #' @param energy_out Numeric vector. Total energy output (MJ/ha).
 #' @param human_energy Numeric vector. Human labour energy input (MJ/ha).
 #' @param verbose Logical. If \code{TRUE}, prints informational messages.
-#'   Default \code{TRUE}.
+#'   Default \code{getOption("wefnexus.verbose", TRUE)}, so
+#'   \code{options(wefnexus.verbose = FALSE)} silences all functions.
 #'
 #' @return Numeric vector. Human energy profitability (dimensionless ratio).
 #'
@@ -379,7 +397,7 @@ energy_profitability <- function(gross_return, energy_in, verbose = TRUE) {
 #'
 #' @export
 human_energy_profitability <- function(energy_out, human_energy,
-                                       verbose = TRUE) {
+                                       verbose = getOption("wefnexus.verbose", TRUE)) {
   .validate_numeric(energy_out, "energy_out")
   .validate_positive(human_energy, "human_energy")
   .validate_same_length(energy_out, human_energy)

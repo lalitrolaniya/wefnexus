@@ -9,7 +9,7 @@ physiological_efficiency(
   yield_control,
   uptake_treated,
   uptake_control,
-  verbose = TRUE
+  verbose = getOption("wefnexus.verbose", TRUE)
 )
 }
 \arguments{
@@ -24,7 +24,8 @@ fertilizer (kg/ha).}
 fertilizer (kg/ha).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints informational messages.
-Default \code{TRUE}.}
+Default \code{getOption("wefnexus.verbose", TRUE)}, so
+\code{options(wefnexus.verbose = FALSE)} silences all functions.}
 }
 \value{
 Numeric vector. Physiological efficiency (kg grain per kg
