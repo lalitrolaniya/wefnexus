@@ -1,10 +1,9 @@
 name: pkgdown
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, master]
-  release:
-    types: [published]
 
 permissions:
   contents: read
